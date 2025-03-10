@@ -40,7 +40,7 @@ class SortedLinkedList {
     };
     void remove (int index){
         if (index < 0 || index >= count-1){
-        throw std::out_of_range("Index out of bounds");
+        return ;
         }
         Node* last = head ;
         if (index == 0){
