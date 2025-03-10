@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <sstream>
 using namespace std ;
 class Node {
     public:
@@ -47,6 +49,7 @@ class SortedLinkedList {
             Node* tmp = head ;
             head = head->next ;
             delete tmp ;
+            count-- ;
         }
         else {
         for (int i = 0; i < index-1 ; i++){
@@ -55,6 +58,7 @@ class SortedLinkedList {
         Node* tmp = last->next;
         last->next = tmp->next ;
         delete tmp ;
+        count--;
         }
     };
     friend ostream& operator<<(ostream& os , const SortedLinkedList& list){
@@ -73,7 +77,7 @@ class SortedLinkedList {
     };
     int operator [](int index){
         if (index < 0 || index >= count-1){
-        throw std::out_of_range("Index out of bounds");    
+        throw out_of_range("Index out of bounds");    
         }
         Node* last = head ;
         for (int i = 1 ; i < index ; i++){
@@ -90,20 +94,33 @@ class SortedLinkedList {
     }
     };
 };
+void processFile(const string& filename, SortedLinkedList& list) {
+    ifstream file(filename);
+    if (!file) {
+        cerr << "Error opening file!\n";
+        return;
+    }
+    string line;
+    if (getline(file, line)) {
+        stringstream ss(line);
+        int num;
+        while (ss >> num) {
+            list.insert(num);
+        }
+    }
+    cout << "Sorted Linked List : " << list <<endl;
+    if (getline(file, line)) {
+        int index;
+        stringstream ss(line);
+        while (ss >> index) {
+            list.remove(index);
+        }
+    }
+    cout << "Sorted Linked List after remove the element/s : " << list <<endl;
+    file.close();
+}
 int main (){
     SortedLinkedList L ;
-    L.insert(5);
-    L.insert(8);
-    L.insert(7);
-    L.insert(6);
-    L.insert(6) ;
-    cout << L << endl;
-    cout << L[2]<<endl;
-    L.remove(0);
-    cout << L << endl;
-    L.remove(2);
-    cout << L << endl;
-    L.remove(2);
-    cout << L << endl;
+    processFile("file.txt" , L);
     
 }
