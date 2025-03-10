@@ -1,1 +1,335 @@
+// Problem 1: Fatima's Iftar Gathering
 
+#include <iostream>
+#include <list>
+#include <limits>
+using namespace std;
+
+class Guest{
+    string name;
+    string contact;
+    string iftar_date;
+public:
+    // parameterized constructor
+    Guest(const string& guest_name, const string& guest_contact, const string& invite_date) {
+        name = guest_name;
+        contact = guest_contact;
+        iftar_date = invite_date;
+    }
+    // displaying the guest information
+    void display_guest(){
+        cout << "Guest: " << name << ", Contact: " << contact << ", Iftar Date: " << iftar_date << endl;
+    }
+    // updating the information of the guest
+    void update_invitation(const string& new_date){
+        iftar_date = new_date;
+        cout << name << "'s date has been updated!\nHere's the new date: " << iftar_date << endl;
+    }
+
+    // getters
+    string get_name() { return name; }
+    string get_iftar_date() { return iftar_date; }
+    string get_contact() { return contact; }
+
+};
+
+class IftarManager{
+    list<Guest> guest_list;
+public:
+    // adding a guest to the list
+    void add_guest(Guest guest){
+        auto it = guest_list.begin();
+        while (it != guest_list.end()) {
+            if (it->get_name() == guest.get_name()) {
+                cerr << "\nError: " << guest.get_name() << " is already in the guest list." << endl;
+                return;
+            }
+            it++;
+        }
+        guest_list.insert(it, guest);
+        cout << "-> " << guest.get_name() << " has been added to the guest list.\n" << endl;
+    }
+
+    // removing a gust from the list
+    void remove_guest(Guest guest){
+        auto it = guest_list.begin();
+        bool found = false;
+        while (it != guest_list.end()) {
+            if (it->get_name() == guest.get_name()) {
+                found = true;
+                break;
+            }
+            it++;
+        }
+
+        // shifting the guests to remove a guest
+        if (found) {
+            auto next_it = it;
+            next_it++;
+            while (next_it != guest_list.end()) {
+                *it = *next_it;
+                it++;
+                next_it++;
+            }
+            guest_list.pop_back();
+            cout << "-> " << guest.get_name() << " has been removed from the guest list.\n";
+        } else {
+            cerr << "-> Guest " << guest.get_name() << " hasn't been found in the list.\n\n";
+        }
+    }
+
+    // displaying the guest list
+    void display_all_guests(){
+        cout << "===== Guest List =====\n";
+        for (Guest g : guest_list){
+            g.display_guest();
+        }
+        cout << "======================";
+    }
+
+    // updating the guest list
+    void update_guest_invitation(const string& name, const string& new_date) {
+        for (Guest& g : guest_list) {
+            if (g.get_name() == name) {
+                g.update_invitation(new_date);
+                return;
+            }
+        }
+        cerr << "These is no guest with this name\n";
+    }
+
+    // sending reminders
+    void send_reminder(const string& date){
+        bool found = false;
+        for (auto guest : guest_list) {
+            if (guest.get_iftar_date() == date) {
+                cout << "Reminder sent to " << guest.get_name()
+                     << ": Your Iftar invitation is on "<< date << "!\n\n";
+                found = true;
+            }
+        }
+        if (!found) {
+            cerr << "No guests were found with the Iftar date: " << date << ".\n";
+        }
+    }
+
+    // Sorting the guest list by selection sort algorithm
+    void sort_guest_list() {
+        //auto it;
+        for (auto it = guest_list.begin(); it != guest_list.end(); it++) {
+            auto least = it;
+            for (auto j = next(it); j != guest_list.end(); j++) {
+                if (j->get_iftar_date() < least->get_iftar_date()) {
+                    least = j;
+                }
+            }
+            if (least != it) {
+                swap(*it, *least);
+            }
+        }
+    }
+
+    // clearing the guest list
+    void clearlist(){
+        guest_list.begin() = guest_list.end();
+    }
+};
+
+int main() {
+    IftarManager manager;
+    string name , contact , date;
+    Guest guest(name , contact , date);
+
+    cout << "\n======== Welcome To Fatima's Iftar Gathering ;) ========\n";
+    manager.clearlist();
+
+    while (true) {
+        cout << "\n- Please choose what you want to do:\n"
+             << "  1) Test the program with a predefined guest list.\n"
+             << "  2) Make your own guest list.\n"
+             << "  3) Exit the program.\n";
+        int choice;
+        cin >> choice;
+
+        // predefined guest list
+        if (choice == 1){
+
+            // adding guests to the list
+            cout << "---------------------------------------\n"<<endl;
+            cout << "1. Adding guestss...\n";
+            manager.add_guest(Guest("Mostafa", "mostafa23@gmail.com", "2025-03-15"));
+            manager.add_guest(Guest("Omar", "omarR@gmail.com", "2025-03-10"));
+            manager.add_guest(Guest("Sarah", "sarasalem@gmail.com", "2025-03-20"));
+
+            // displaying the guest list
+            cout << "---------------------------------------\n"<<endl;
+            cout << "2. Displaying the guest list...\n";
+            manager.display_all_guests();
+
+            // Adding a duplicate Guest
+            cout << "\n---------------------------------------\n"<<endl;
+            cout << "3. Adding a duplicate guest 'Omar'\n";
+            manager.add_guest(Guest("Omar", "omarR@gmail.com", "2025-03-10"));
+
+            //Removing a guest
+            cout << "\n---------------------------------------\n"<<endl;
+            cout << "4. Removing the guest Mostafa...\n";
+            manager.remove_guest(Guest("Mostafa", "mostafa23@gmail.com", "2025-03-15"));
+
+            // sorting the list
+            cout << "\n---------------------------------------\n"<<endl;
+            cout << "5. Sorting the list...\n";
+            manager.sort_guest_list();
+            manager.display_all_guests();
+
+            // updating the list
+            cout << "\n---------------------------------------\n"<<endl;
+            cout << "6. Updating invitation for omar...\n";
+            manager.update_guest_invitation("Omar", "2025-03-18");
+            manager.display_all_guests();
+
+            cout << "\n---------------------------------------\n"<<endl;
+            //Updating non-existing guest
+            cout << "7. Updating a non existing guest...\n";
+            manager.update_guest_invitation("Khalid", "2025-03-12");
+
+
+            //Sending reminder
+            cout << "\n---------------------------------------\n"<<endl;
+            cout << "Sending reminders...\n";
+            manager.send_reminder("2025-03-20");
+            cout << endl;
+
+            continue;
+        }
+
+         // making the user enter the details of the guests he wants to invite
+        else if (choice == 2){
+            manager.clearlist();
+            int number;
+            cout << "~ Please enter the number of guests you want to invite:";
+            while(true) {
+                // validation check to make sure the input is valid
+                cin >> number;
+                if (cin.fail()) {
+                    cerr << "Invalid input, please input a valid number!!\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+
+                }
+                else if(number<=0){
+                    cerr << "Please enter a valid integer greater that 0";
+                    continue;
+                }
+                else {
+                    break;
+                }
+            }
+
+            cin.ignore();
+            // inputting the guest details
+            for (int i = 0 ; i < number ; i++){
+                cout << "Please enter the Name, Email and Date of invitation of guest " << i+1 << ":\n";
+                cout << "Name: ";
+                getline(cin,name);
+                cout << "Contact: ";
+                getline(cin,contact);
+                cout << "Invitation date: ";
+                getline(cin,date);
+                manager.add_guest(Guest(name, contact, date));
+            }
+
+            // asking the user what operation he wants to perform on the guest list
+            while (true){
+                int number2;
+                cout << "\n-- What would you like to do with the guest list?\n"
+                     << "  1) Display the guest list\n"
+                     << "  2) Add a guest\n"
+                     << "  3) Remove a guest\n"
+                     << "  4) Send a reminder to a guest\n"
+                     << "  5) Sort the guest list\n"
+                     << "  6) Update the guest invitation\n"
+                     << "  7) Go back\n"
+                     << "  Please enter your choice:\n";
+                cin >> number2;
+                cin.ignore();
+
+                switch (number2) {
+                    // display the guest list
+                    case 1:
+                        cout << "Displaying the guest list...\n";
+                        manager.display_all_guests();
+                        break;
+
+                        // adding a new guest to the list
+                    case 2:
+                        cout << "Please enter the guest details of the new guest (name, email, date): ";
+                        getline(cin, name);
+                        getline(cin, contact);
+                        getline(cin, date);
+                        manager.add_guest(Guest(name, contact, date));
+                        break;
+
+                        // removing a guest from the list
+                    case 3:
+                        cout << "Please enter the guest name you want to remove: ";
+                        getline(cin, name);
+                        manager.remove_guest(Guest(name, contact, date));
+                        break;
+
+                        // sending a reminder to a guest
+                    case 4:
+                        cout << "Please enter the date you want to make a reminder for:";
+                        getline(cin, date);
+                        cout << "Sending reminders...";
+                        manager.send_reminder(date);
+                        break;
+
+                        // sorting the guest list
+                    case 5:
+                        manager.sort_guest_list();
+                        cout << "Sorting the guest list...\n\n";
+                        manager.display_all_guests();
+                        break;
+
+                        // updating the guest invitation
+                    case 6:
+                        cout << "Please enter the name of the guest you want to change the date of invitation: ";
+                        getline(cin, name);
+                        getline(cin, date);
+                        cout << "Updating the invitation for..." << name;
+                        manager.update_guest_invitation(name, date);
+                        break;
+
+                        // exiting
+                    case 7:
+                        break;
+
+                        // the user input an invalid choice
+                    default:
+                        cerr << "\nInvalid choice! Please enter a valid choice between 1 and 7\n";
+                        cin.clear(); // Clear the input
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        continue;
+                }
+
+                // exiting and returning to main menu
+                if (number2 == 7) break;
+            }
+        }
+
+            // exiting the program
+        else if (choice == 3) {
+            cout << "Exiting...\n";
+            cout << "Thank you for using the program!!\nMay your Iftar gatherings be full of warmth and blessings!\n";
+            break;
+        }
+
+        else {
+            cerr << "Invalid choice! Try again.\n";
+        }
+
+    }
+    return 0;
+}
