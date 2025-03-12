@@ -146,11 +146,16 @@ int input(int degree,int* coeff){
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cerr << "Invalid input!! Please input a valid integer coefficient!!\n";
             cin>> coeff[i];
-            continue;
         }
     }
+    // inputting the constant term
     cin >> coeff[0];
-
+    while(cin.fail()){
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cerr << "Invalid input!! Please input a valid integer for the constant term!!\n";
+        cin>> coeff[0];
+    }
     return *coeff;
 }
 
@@ -219,6 +224,8 @@ int main() {
             add(degree1, coeff1, degree2, coeff2);
             // calculating the difference of both polynomials
             subtract(degree1, coeff1, degree2, coeff2);
+
+            cout << "--------------------------------------------------\n";
 
             // deallocating the memory of the dynamic array of both polynomials
             delete[] coeff1;
