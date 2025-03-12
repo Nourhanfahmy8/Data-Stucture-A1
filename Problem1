@@ -5,25 +5,29 @@
 #include <limits>
 using namespace std;
 
+// class guest to store the guest details
 class Guest{
     string name;
     string contact;
     string iftar_date;
 public:
+
     // parameterized constructor
     Guest(const string& guest_name, const string& guest_contact, const string& invite_date) {
         name = guest_name;
         contact = guest_contact;
         iftar_date = invite_date;
     }
+
     // displaying the guest information
     void display_guest(){
         cout << "Guest: " << name << ", Contact: " << contact << ", Iftar Date: " << iftar_date << endl;
     }
-    // updating the information of the guest
+
+    // updating the invitation date of the guest
     void update_invitation(const string& new_date){
         iftar_date = new_date;
-        cout << name << "'s date has been updated!\nHere's the new date: " << iftar_date << endl;
+        cout << name << "'s date has been updated!\nHere's the new date: " << iftar_date << "\n\n";
     }
 
     // getters
@@ -33,19 +37,23 @@ public:
 
 };
 
+// class to manage the invitations
 class IftarManager{
     list<Guest> guest_list;
 public:
+
     // adding a guest to the list
     void add_guest(Guest guest){
         auto it = guest_list.begin();
+        // checking if the input name has been added before
         while (it != guest_list.end()) {
-            if (it->get_name() == guest.get_name()) {
-                cerr << "\nError: " << guest.get_name() << " is already in the guest list." << endl;
+            if (it->get_contact() == guest.get_contact()) {
+                cerr << "\nError: A guest with the same contact details is already in the guest list.\n" << endl;
                 return;
             }
             it++;
         }
+        // else storing the information of the guest
         guest_list.insert(it, guest);
         cout << "-> " << guest.get_name() << " has been added to the guest list.\n" << endl;
     }
@@ -80,14 +88,21 @@ public:
 
     // displaying the guest list
     void display_all_guests(){
-        cout << "===== Guest List =====\n";
-        for (Guest g : guest_list){
-            g.display_guest();
+        if(guest_list.empty()){
+            cout << "===== Guest List =====\n";
+            cout << "'The guest list is empty'\n";
+            cout << "======================\n\n";
         }
-        cout << "======================";
+        else {
+            cout << "===== Guest List =====\n";
+            for (Guest g: guest_list) {
+                g.display_guest();
+            }
+            cout << "======================\n\n";
+        }
     }
 
-    // updating the guest list
+    // updating the invitation date of a guest
     void update_guest_invitation(const string& name, const string& new_date) {
         for (Guest& g : guest_list) {
             if (g.get_name() == name) {
@@ -98,7 +113,7 @@ public:
         cerr << "These is no guest with this name\n";
     }
 
-    // sending reminders
+    // sending reminders according to the input date
     void send_reminder(const string& date){
         bool found = false;
         for (auto guest : guest_list) {
@@ -135,16 +150,103 @@ public:
     }
 };
 
+// validation check on the input contact to make sure that it is in the correct phone/email format
+bool check_contact(const string &contact){
+    // checking if the contact is a phone number
+    if(contact.length() == 11) {
+        // checking if the phone number is all numbers
+        for (char c: contact) {
+            if (!isdigit(c))return false;
+        }
+        return true;
+    }
+
+    // else check if the contact was an email
+    else {
+        // searching for the '@' in the input
+        size_t p = contact.find('@');
+        // if '@' wasn't found then the input is in the wrong format
+        if (p == string::npos || p == contact.length() - 1 || p == 0) {
+            return false;
+        }
+
+        // else checking to make sure that the email extension is in the correct format
+        string email_extension = contact.substr(p);
+        if (email_extension != "@gmail.com" && email_extension != "@yahoo.com" && email_extension != "@hotmail.com") {
+            return false;
+        }
+        return true;
+    }
+}
+
+
+// validation check on the input date to make sure it is in the correct format
+// Format: YYYY-MM-DD
+bool check_date(const string &date){
+    // check if the input is > 10 characters
+    if(date.length()>10){
+        return false;
+    }
+    else if(date[4]!='-' and date[7]!='-'){
+        return false;
+    }
+
+    // extracting each part of the date to validate individually
+    string year = date.substr(0,4);
+    string month = date.substr(5,2);
+    string day = date.substr(8);
+
+    // making sure the user inputs the correct format
+    if(year.length()!= 4 || month.length()!=2 || day.length()!=2) return false;
+
+    // making sure that the input year is all integers
+    for(char y : year){
+        if(!isdigit(y)) return false;
+    }
+    // making sure that the input month is all integers
+    for(char m : month){
+        if(!isdigit(m)) return false;
+    }
+    // making sure that the input day is all integers
+    for(char d : day){
+        if(!isdigit(d)) return false;
+    }
+
+    // converting the extracted year, month and day into integers to be able to compare
+    int intyear = stoi(year);
+    int intmonth = stoi(month);
+    int intday = stoi(day);
+
+    // validate the year to make sure the invitation isn't done in the past, before 2025
+    if(intyear < 2025) return false;
+
+    //validate the month
+    if(intmonth<1 || intmonth > 12) return false;
+
+    //validate the day
+    if(intday<1 || intday >31) return false;
+
+    // checking if the input month is feb and if the year is a leap year
+    if(intyear % 4 ==0 && intmonth == 2 && intday >29)return false;
+    // the year is not a leap year
+    else if(intmonth == 2 && intday>28) return false;
+    return true;
+}
+
+// main logic of the program
 int main() {
+
     IftarManager manager;
     string name , contact , date;
     Guest guest(name , contact , date);
 
-    cout << "\n======== Welcome To Fatima's Iftar Gathering ;) ========\n";
-    manager.clearlist();
+    cout << "\n--------------------------------------------------------\n";
+    cout << "======== Welcome To Fatima's Iftar Invitation manager ;) ========\n";
+    cout << "--------------------------------------------------------\n";
 
+    // menu to choose what the user wants to do
     while (true) {
-        cout << "\n- Please choose what you want to do:\n"
+        cout << "\n- Please choose what you would like to do:\n"
              << "  1) Test the program with a predefined guest list.\n"
              << "  2) Make your own guest list.\n"
              << "  3) Exit the program.\n";
@@ -153,61 +255,50 @@ int main() {
 
         // predefined guest list
         if (choice == 1){
-
             // adding guests to the list
-            cout << "---------------------------------------\n"<<endl;
-            cout << "1. Adding guestss...\n";
+            cout << "\n1. Adding guestss...\n";
             manager.add_guest(Guest("Mostafa", "mostafa23@gmail.com", "2025-03-15"));
             manager.add_guest(Guest("Omar", "omarR@gmail.com", "2025-03-10"));
             manager.add_guest(Guest("Sarah", "sarasalem@gmail.com", "2025-03-20"));
 
             // displaying the guest list
-            cout << "---------------------------------------\n"<<endl;
-            cout << "2. Displaying the guest list...\n";
+            cout << "\n2. Displaying the guest list...\n";
             manager.display_all_guests();
 
             // Adding a duplicate Guest
-            cout << "\n---------------------------------------\n"<<endl;
-            cout << "3. Adding a duplicate guest 'Omar'\n";
+            cout << "\n3. Adding a duplicate guest 'Omar'\n";
             manager.add_guest(Guest("Omar", "omarR@gmail.com", "2025-03-10"));
 
             //Removing a guest
-            cout << "\n---------------------------------------\n"<<endl;
-            cout << "4. Removing the guest Mostafa...\n";
+            cout << "\n4. Removing the guest Mostafa...\n";
             manager.remove_guest(Guest("Mostafa", "mostafa23@gmail.com", "2025-03-15"));
 
             // sorting the list
-            cout << "\n---------------------------------------\n"<<endl;
-            cout << "5. Sorting the list...\n";
+            cout << "\n5. Sorting the list...\n";
             manager.sort_guest_list();
             manager.display_all_guests();
 
             // updating the list
-            cout << "\n---------------------------------------\n"<<endl;
-            cout << "6. Updating invitation for omar...\n";
+            cout << "\n6. Updating invitation for omar...\n";
+
             manager.update_guest_invitation("Omar", "2025-03-18");
             manager.display_all_guests();
 
-            cout << "\n---------------------------------------\n"<<endl;
-            //Updating non-existing guest
-            cout << "7. Updating a non existing guest...\n";
+            //Updating the information of a non-existing guest
+            cout << "\n7. Updating a non existing guest...\n";
             manager.update_guest_invitation("Khalid", "2025-03-12");
 
-
             //Sending reminder
-            cout << "\n---------------------------------------\n"<<endl;
-            cout << "Sending reminders...\n";
+            cout << "\n8. Sending reminders...\n";
             manager.send_reminder("2025-03-20");
             cout << endl;
-
             continue;
         }
 
          // making the user enter the details of the guests he wants to invite
         else if (choice == 2){
-            manager.clearlist();
             int number;
-            cout << "~ Please enter the number of guests you want to invite:";
+            cout << "- Please enter the number of guests you want to invite: ";
             while(true) {
                 // validation check to make sure the input is valid
                 cin >> number;
@@ -216,10 +307,9 @@ int main() {
                     cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     continue;
-
                 }
                 else if(number<=0){
-                    cerr << "Please enter a valid integer greater that 0";
+                    cerr << "Please enter a valid integer greater that 0!!";
                     continue;
                 }
                 else {
@@ -230,13 +320,25 @@ int main() {
             cin.ignore();
             // inputting the guest details
             for (int i = 0 ; i < number ; i++){
-                cout << "Please enter the Name, Email and Date of invitation of guest " << i+1 << ":\n";
+                cout << "--> Please enter the Name, Email and Date of invitation of guest " << i+1 << ": \n";
                 cout << "Name: ";
                 getline(cin,name);
+
                 cout << "Contact: ";
+                //validation check on the input contact
                 getline(cin,contact);
+                while(!check_contact(contact)){
+                    cerr << "The input contact is invalid, please input either a phone number or an email\n";
+                    getline(cin,contact);
+                }
+
                 cout << "Invitation date: ";
+                // validation check on the input date
                 getline(cin,date);
+                while(!check_date(date)){
+                    cerr << "The input date is invalid, please input a suitable date (YYYY-MM-DD)\n";
+                    getline(cin,date);
+                }
                 manager.add_guest(Guest(name, contact, date));
             }
 
@@ -251,54 +353,83 @@ int main() {
                      << "  5) Sort the guest list\n"
                      << "  6) Update the guest invitation\n"
                      << "  7) Go back\n"
-                     << "  Please enter your choice:\n";
+                     << "--> Please enter your choice: ";
                 cin >> number2;
                 cin.ignore();
 
                 switch (number2) {
                     // display the guest list
                     case 1:
-                        cout << "Displaying the guest list...\n";
+                        cout << "\nDisplaying the guest list...\n";
                         manager.display_all_guests();
                         break;
 
                         // adding a new guest to the list
                     case 2:
-                        cout << "Please enter the guest details of the new guest (name, email, date): ";
-                        getline(cin, name);
-                        getline(cin, contact);
-                        getline(cin, date);
+                        cout << "\nPlease enter the guest details of the new guest:\n";
+                        cout << "Name: ";
+                        getline(cin,name);
+
+                        cout << "Contact: ";
+                        //validation check on the input contact
+                        getline(cin,contact);
+                        while(!check_contact(contact)){
+                            cerr << "The input contact is invalid, please input either a phone number or an email\n";
+                            getline(cin,contact);
+                        }
+
+                        cout << "Invitation date: ";
+                        // validation check on the input date
+                        getline(cin,date);
+                        while(!check_date(date)){
+                            cerr << "The input date is invalid, please input a suitable date (YYYY-MM-DD)\n";
+                            getline(cin,date);
+                        }
+
                         manager.add_guest(Guest(name, contact, date));
                         break;
 
                         // removing a guest from the list
                     case 3:
-                        cout << "Please enter the guest name you want to remove: ";
+                        cout << "\nPlease enter the guest name you want to remove: ";
                         getline(cin, name);
                         manager.remove_guest(Guest(name, contact, date));
                         break;
 
                         // sending a reminder to a guest
                     case 4:
-                        cout << "Please enter the date you want to make a reminder for:";
+                        cout << "\nPlease enter the date you want to send a reminder for:";
                         getline(cin, date);
-                        cout << "Sending reminders...";
+                        // validation check on the input date
+                        getline(cin,date);
+                        while(!check_date(date)){
+                            cerr << "\nThe input date is invalid, please input a suitable date (YYYY-MM-DD)\n";
+                            getline(cin,date);
+                        }
+
+                        cout << "\nSending reminders...";
                         manager.send_reminder(date);
                         break;
 
                         // sorting the guest list
                     case 5:
                         manager.sort_guest_list();
-                        cout << "Sorting the guest list...\n\n";
+                        cout << "\nSorting the guest list...\n\n";
                         manager.display_all_guests();
                         break;
 
                         // updating the guest invitation
                     case 6:
-                        cout << "Please enter the name of the guest you want to change the date of invitation: ";
+                        cout << "\nPlease enter the name of the guest you want to change the date of invitation: ";
                         getline(cin, name);
-                        getline(cin, date);
-                        cout << "Updating the invitation for..." << name;
+
+                        // validation check on the input date
+                        getline(cin,date);
+                        while(!check_date(date)){
+                            cerr << "\nThe input date is invalid, please input a suitable date (YYYY-MM-DD)\n";
+                            getline(cin,date);
+                        }
+                        cout << "\nUpdating the invitation for..." << name;
                         manager.update_guest_invitation(name, date);
                         break;
 
@@ -326,6 +457,7 @@ int main() {
             break;
         }
 
+        // invalid choice was input
         else {
             cerr << "Invalid choice! Try again.\n";
         }
