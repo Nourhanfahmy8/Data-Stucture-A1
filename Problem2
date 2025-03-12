@@ -1,1 +1,146 @@
 
+#include <iostream>
+
+using namespace std;
+
+/// Print polynomial
+void Output(int degree, int *coeff){
+
+    for(int i = 0; i <= degree; i++) {
+        int power = degree - i;
+        int c = coeff[i];
+
+        if (c == 0)     // skip the zero coefficient
+            continue;
+
+        if (i == 0) {     // don't print the sign of the first unless it is -ve
+            if (c > 0)
+                cout << " " << c;
+            else
+                cout << " - " << abs(c);
+        }
+        else {       // print the sign
+            if (c > 0)
+                cout << " + " << c;
+            else
+                cout << " - " << abs(c);
+        }
+
+        //print power (skip the power 1)
+        if (power > 0)
+            cout << "x";
+        if (power > 1)
+            cout << "^" << power;
+    }
+    cout << " = " << coeff[degree + 1] << endl;
+
+}
+
+void add(int d1, int* coeff1, int d2, int* coeff2){
+    int resultDegree = max(d1,d2);
+    int* resultCoeff = new int [resultDegree + 2];
+
+    // Initialize result array with zeros
+    for (int i = 0; i <= resultDegree + 1; i++) {
+        resultCoeff[i] = 0;
+    }
+
+    // Add coefficients from first polynomial
+    for (int i = 0; i <= d1; i++) {
+        // Calculate the corresponding position in the result array
+        int resultPos = resultDegree - (d1 - i);
+        resultCoeff[resultPos] += coeff1[i];
+    }
+
+    // Add coefficients from second polynomial
+    for (int i = 0; i <= d2; i++) {
+        // Calculate the corresponding position in the result array
+        int resultPos = resultDegree - (d2 - i);
+        resultCoeff[resultPos] += coeff2[i];
+    }
+
+    resultCoeff[resultDegree + 1] = coeff1[d1 + 1] + coeff2[d2 + 1];    // for the constant
+
+    cout<< "Sum of polynomials: ";
+    Output(resultDegree,resultCoeff );
+
+    delete[] resultCoeff;
+}
+
+void subtract(int d1, int* coeff1, int d2, int* coeff2){
+    int resultDegree = max(d1,d2);
+    int* resultCoeff = new int [resultDegree + 2];
+
+    // Initialize result array with zeros
+    for (int i = 0; i <= resultDegree + 1; i++) {
+        resultCoeff[i] = 0;
+    }
+
+    // Add coefficients from first polynomial
+    for (int i = 0; i <= d1; i++) {
+        // Calculate the corresponding position in the result array
+        int resultPos = resultDegree - (d1 - i);
+        resultCoeff[resultPos] += coeff1[i];
+    }
+
+    // Add coefficients from second polynomial
+    for (int i = 0; i <= d2; i++) {
+        // Calculate the corresponding position in the result array
+        int resultPos = resultDegree - (d2 - i);
+        resultCoeff[resultPos] -= coeff2[i];
+    }
+
+    resultCoeff[resultDegree + 1] = coeff1[d1 + 1] - coeff2[d2 + 1];
+
+    cout<< "Difference of polynomials: ";
+    Output(resultDegree,resultCoeff );
+
+    delete[] resultCoeff;
+}
+
+
+int input(int degree,int* coeff){
+
+    cout<< "Enter polynomial coefficients: ";
+    for(int i = degree + 1; i > 0; i--){
+        cin>> coeff[i];
+    }
+    cin >> coeff[0];
+
+    return *coeff;
+}
+
+int main() {
+
+    // Input array 1
+    int degree1;
+    cout<< "Order of first polynomial: ";
+    cin>> degree1;
+    int *coeff1 = new int [degree1 + 2];
+
+    input(degree1,coeff1);
+
+    /// Input array 2
+    int degree2;
+    cout<< "Order of Second polynomial: ";
+    cin>> degree2;
+    int *coeff2 = new int[degree2 + 2];
+
+    input(degree2,coeff2);
+
+
+    cout<< "First polynomial:" ;
+    Output(degree1, coeff1);
+    cout<< "Second polynomial:" ;
+    Output(degree2, coeff2);
+
+
+    add(degree1,coeff1,degree2,coeff2);
+    subtract(degree1,coeff1,degree2,coeff2);
+
+    delete[] coeff1;
+    delete[] coeff2;
+
+
+    return 0;
+}
