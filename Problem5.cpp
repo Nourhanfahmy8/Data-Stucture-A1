@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <limits>
-#include <fstream>
 using namespace std;
 
 // Class for Statistical Calculation
@@ -165,15 +164,20 @@ void StatisticalCalculation<T>::statisticMenu() {
 }
 
 
-
 //============================================================
-  
-
 int main(){
     int size;
     cout << "Enter the number of elements: ";
-    cin >> size;
-    StatisticalCalculation<int> sc(size);
+
+    while (!(cin >> size) || size <= 0) {
+        cout << "Invalid input. Please enter a valid positive number: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+
+
+    
+    StatisticalCalculation<double> sc(size);
     sc.inputData();
     sc.sort();
     sc.displayArray();
