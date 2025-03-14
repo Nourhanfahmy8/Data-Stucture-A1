@@ -1,469 +1,244 @@
-// Problem 1: Fatima's Iftar Gathering
-
+// Problem 2: Polynomial operations using pointers
 #include <iostream>
-#include <list>
 #include <limits>
 using namespace std;
 
-// class guest to store the guest details
-class Guest{
-    string name;
-    string contact;
-    string iftar_date;
-public:
-    // default constructor
-    Guest() = default;
-    // parameterized constructor
-    Guest(const string& guest_name, const string& guest_contact, const string& invite_date) {
-        name = guest_name;
-        contact = guest_contact;
-        iftar_date = invite_date;
-    }
+/// Print polynomial
+void Output(int degree, int *coeff){
 
-    // displaying the guest information
-    void display_guest(){
-        cout << "Guest: " << name << ", Contact: " << contact << ", Iftar Date: " << iftar_date << endl;
-    }
+    // looping over the dynamic array storing the coefficients in the size of the degree
+    for(int i = 0; i <= degree; i++) {
+        // calculating the power of x for each coefficient
+        int power = degree - i;
+        // storing the coefficient
+        int c = coeff[i];
 
-    // updating the invitation date of the guest
-    void update_invitation(const string& new_date){
-        iftar_date = new_date;
-        cout << name << "'s date has been updated!\nHere's the new date: " << iftar_date << "\n\n";
-    }
+        // if the coefficient is zero, skip it
+        if (c == 0)
+            continue;
 
-    // getters
-    string get_name() { return name; }
-    string get_iftar_date() { return iftar_date; }
-    string get_contact() { return contact; }
-
-};
-
-// class to manage the invitations
-class IftarManager{
-    Guest* guest_list;
-    int size , capacity;
-    void resize(){
-        capacity *= 2;
-        Guest* new_list = new Guest[capacity];
-        for (size_t i = 0; i < size; ++i) {
-            new_list[i] = guest_list[i];
+        // if the index = 0, meaning that it is the first coefficient in the polynomial
+        // will not print the sign of the coefficient unless it is negative
+        if (i == 0) {
+            if (c > 0)
+                cout << " " << c;
+            else
+                cout << " - " << abs(c);
         }
-        delete[] guest_list;
-        guest_list = new_list;
-    }
-public:
 
-    // adding a guest to the list
-    void add_guest(Guest guest){
-        for(int i = 0 ; i < size ; i++){
-            if (guest_list[i].get_contact() == guest.get_contact()) {
-                cerr << "\nError: A guest with the same contact details is already in the guest list.\n" << endl;
-                return;
-            }
-        }
-        if (size >= capacity) {
-            resize();
-        }
-        // else storing the information of the guest
-        guest_list[size++] = guest;
-        cout << "-> " << guest.get_name() << " has been added to the guest list.\n" << endl;
-    }
-
-    // removing a gust from the list
-    void remove_guest(Guest guest){
-        for(int i = 0 ; i < size; i++) {
-            if (guest_list[i].get_name() == guest.get_name()) {
-                for (int j = i; j < size - 1; j++) {
-                    guest_list[j] = guest_list[j + 1];
-                }
-                size--;
-                cout << "-> " << guest.get_name() << " has been removed from the guest list.\n";
-                return;
-            }
-        }
-        cerr << "-> Guest " << guest.get_name() << " hasn't been found in the list.\n";
-    }
-
-    // displaying the guest list
-    void display_all_guests(){
-        if(size == 0){
-            cout << "===== Guest List =====\n";
-            cout << "'The guest list is empty'\n";
-            cout << "======================\n";
-        }
+            // print the sign
         else {
-            cout << "===== Guest List =====\n";
-            for (int i = 0 ; i < size ; i++) {
-                guest_list[i].display_guest();
+            // if the coefficient is a positive number, then print the + sign, else the - sign
+            if(c==1 && power == 0){
+                cout << " + " << c;
             }
-            cout << "======================\n";
-        }
-    }
-
-    // updating the invitation date of a guest
-    void update_guest_invitation(const string& name, const string& new_date) {
-        for (int i = 0; i < size; i++) {
-            if (guest_list[i].get_name() == name) {
-                guest_list[i].update_invitation(new_date);
-                return;
+            else if (c==-1 && power == 0){
+                cout << " - " << abs(c);
             }
-        }
-        cerr << "There is no guest with this name\n";
-    }
-
-    // sending reminders according to the input date
-    void send_reminder(const string& date){
-        bool found = false;
-        for (size_t i = 0; i < size; ++i) {
-            if (guest_list[i].get_iftar_date() == date) {
-                cout << "Reminder sent to " << guest_list[i].get_name()
-                     << ": Your Iftar invitation is on "<< date << "!\n";
-                found = true;
+            else if(c==1 && power >0){
+                cout << " + ";
             }
-        }
-        if (!found) {
-            cerr << "No guests were found with the Iftar date: " << date << ".\n";
-        }
-    }
-
-    // Sorting the guest list by selection sort algorithm
-    void sort_guest_list() {
-        for (int i = 0; i < size - 1; i++) {
-            int least = i;
-            for (int j = i + 1; j < size; j++) {
-                if (guest_list[j].get_iftar_date() < guest_list[least].get_iftar_date()) {
-                    least = j;
-                }
+            else if (c==-1 && power >0){
+                cout << " - ";
             }
-            if (least != i) {
-                swap(guest_list[i], guest_list[least]);
-            }
-        }
-    }
-
-    // clearing the guest list
-    void clearlist(){
-        size = 0;
-    }
-};
-
-// validation check on the input contact to make sure that it is in the correct phone/email format
-bool check_contact(const string &contact){
-    // checking if the contact is a phone number
-    if(contact.length() == 11) {
-        // checking if the phone number is all numbers
-        for (char c: contact) {
-            if (!isdigit(c))return false;
-        }
-        return true;
-    }
-
-        // else check if the contact was an email
-    else {
-        // searching for the '@' in the input
-        size_t p = contact.find('@');
-        // if '@' wasn't found then the input is in the wrong format
-        if (p == string::npos || p == contact.length() - 1 || p == 0) {
-            return false;
+            else if (c > 0)
+                cout << " + " << c;
+            else
+                cout << " - " << abs(c);
         }
 
-        // else checking to make sure that the email extension is in the correct format
-        string email_extension = contact.substr(p);
-        if (email_extension != "@gmail.com" && email_extension != "@yahoo.com" && email_extension != "@hotmail.com") {
-            return false;
-        }
-        return true;
+        //print the power of each coefficient
+        // checking if the power is >0
+        if (power > 0)
+            cout << "x";
+        // if the power = 1, won't print the power
+        if (power > 1)
+            cout << "^" << power;
     }
+
+    // printing the constant element
+    cout << " = " << coeff[degree + 1] << endl;
 }
 
+/// Adding both polynomials
+void add(int d1, int* coeff1, int d2, int* coeff2){
+    // calculating the maximum degree of both polynomials
+    int resultDegree = max(d1,d2);
+    // creating a dynamic array to store the result
+    int* resultCoeff = new int [resultDegree + 2];
 
-// validation check on the input date to make sure it is in the correct format
-// Format: YYYY-MM-DD
-bool check_date(const string &date){
-    // check if the input is > 10 characters
-    if(date.length()>10){
-        return false;
-    }
-    else if(date[4]!='-' and date[7]!='-'){
-        return false;
-    }
-
-    // extracting each part of the date to validate individually
-    string year = date.substr(0,4);
-    string month = date.substr(5,2);
-    string day = date.substr(8);
-
-    // making sure the user inputs the correct format
-    if(year.length()!= 4 || month.length()!=2 || day.length()!=2) return false;
-
-    // making sure that the input year is all integers
-    for(char y : year){
-        if(!isdigit(y)) return false;
-    }
-    // making sure that the input month is all integers
-    for(char m : month){
-        if(!isdigit(m)) return false;
-    }
-    // making sure that the input day is all integers
-    for(char d : day){
-        if(!isdigit(d)) return false;
+    // Initialize the result array with zeros
+    for (int i = 0; i <= resultDegree + 1; i++) {
+        resultCoeff[i] = 0;
     }
 
-    // converting the extracted year, month and day into integers to be able to compare
-    int intyear = stoi(year);
-    int intmonth = stoi(month);
-    int intday = stoi(day);
+    // Add the coefficients from the first polynomial
+    for (int i = 0; i <= d1; i++) {
+        // Calculate the corresponding position in the result array
+        int resultPos = resultDegree - (d1 - i);
+        resultCoeff[resultPos] += coeff1[i];
+    }
 
-    // validate the year to make sure the invitation isn't done in the past, before 2025
-    if(intyear < 2025) return false;
+    // Add the coefficients from the second polynomial
+    for (int i = 0; i <= d2; i++) {
+        // Calculate the corresponding position in the result array
+        int resultPos = resultDegree - (d2 - i);
+        resultCoeff[resultPos] += coeff2[i];
+    }
 
-    //validate the month
-    if(intmonth<1 || intmonth > 12) return false;
+    // adding the constants
+    resultCoeff[resultDegree + 1] = coeff1[d1 + 1] + coeff2[d2 + 1];
 
-    //validate the day
-    if(intday<1 || intday >31) return false;
+    // displaying the result
+    cout<< "Sum of polynomials: ";
+    Output(resultDegree,resultCoeff );
 
-    // checking if the input month is feb and if the year is a leap year
-    if(intyear % 4 ==0 && intmonth == 2 && intday >29)return false;
-        // the year is not a leap year
-    else if(intmonth == 2 && intday>28) return false;
-    return true;
+    // deallocating the memory of the dynamic array
+    delete[] resultCoeff;
 }
 
-// main logic of the program
+/// calculating the difference of both polynomials -> subtracting first from second (second - first)
+void subtract(int d1, int* coeff1, int d2, int* coeff2){
+    // calculating the maximum degree of both polynomials
+    int resultDegree = max(d1,d2);
+    // creating a dynamic array to store the result
+    int* resultCoeff = new int [resultDegree + 2];
+
+    // Initialize result array with zeros
+    for (int i = 0; i <= resultDegree + 1; i++) {
+        resultCoeff[i] = 0;
+    }
+
+    // Adding the coefficients of the second polynomial to the result array
+    for (int i = 0; i <= d2; i++) {
+        // Calculate the corresponding position in the result array
+        int resultPos = resultDegree - (d2 - i);
+        resultCoeff[resultPos] += coeff2[i];
+    }
+
+    // Subtracting the coefficients of the first polynomial from the second polynomial
+    for (int i = 0; i <= d1; i++) {
+        // Calculate the corresponding position in the result array
+        int resultPos = resultDegree - (d1 - i);
+        resultCoeff[resultPos] -= coeff1[i];
+    }
+
+    // subtracting the constants
+    resultCoeff[resultDegree + 1] = coeff2[d2 + 1] - coeff1[d1 + 1];
+
+    // displaying the result
+    cout<< "Difference of polynomials: ";
+    Output(resultDegree,resultCoeff );
+
+    // deallocating the memory of the dynamic array
+    delete[] resultCoeff;
+}
+
+/// making the user input the coefficients and returning the pointer pointing to the dynamic array
+int input(int degree,int* coeff){
+
+    cout<< "Enter polynomial coefficients: ";
+    // coefficients are input in the array from the back corresponding to the power of x
+    for(int i = degree + 1; i >= 0; i--){
+        cin>> coeff[i];
+        while(cin.fail()){
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cerr << "Invalid input!! Please input a valid integer coefficient!! starting from coefficient " << degree - i + 1 <<" \n";
+            cin>> coeff[i];
+            continue;
+        }
+    }
+    //cin >> coeff[0];
+
+
+    return *coeff;
+}
+
 int main() {
 
-    IftarManager manager;
-    string name , contact , date;
-    Guest guest(name , contact , date);
+    cout << "\n========================================================================\n";
+    cout << "===== Welcome to the 'Polynomial operations using pointers' program ======\n";
+    cout << "==========================================================================\n\n";
+    int choice;
 
-    cout << "\n--------------------------------------------------------------------\n";
-    cout << "======== Welcome To Fatima's Iftar Invitation manager ;) ========\n";
-    cout << "----------------------------------------------------------------------\n";
-
-    // menu to choose what the user wants to do
-    while (true) {
-        cout << "\n- Please choose what you would like to do:\n"
-             << "  1) Test the program with a predefined guest list.\n"
-             << "  2) Make your own guest list.\n"
-             << "  3) Exit the program.\n";
-        int choice;
+    while(true) {
+        cout << "--> What would you like to do?\n"
+                "  1) Perform operations on two polynomials\n"
+                "  2) Exit the program\n";
         cin >> choice;
 
-        // predefined guest list
-        if (choice == 1){
-            // adding guests to the list
-            cout << "\n1. Adding guestss...\n";
-            manager.add_guest(Guest("Mostafa", "mostafa23@gmail.com", "2025-03-15"));
-            manager.add_guest(Guest("Omar", "omarR@gmail.com", "2025-03-10"));
-            manager.add_guest(Guest("Sarah", "sarasalem@gmail.com", "2025-03-20"));
+        // performing the operations on the polynomials
+        if (choice == 1) {
 
-            // displaying the guest list
-            cout << "\n2. Displaying the guest list...\n";
-            manager.display_all_guests();
+            /// Input array 1
+            int degree1;
+            cout << "-> Please input the Order of the First polynomial: ";
+            cin >> degree1;
 
-            // Adding a duplicate Guest
-            cout << "\n3. Adding a duplicate guest 'Omar'\n";
-            manager.add_guest(Guest("Omar", "omarR@gmail.com", "2025-03-10"));
+            // validation check on the input degree
+            while(cin.fail() || degree1 <= 0){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cerr << "Invalid input!! Please input a valid Order for the first polynomial\n";
+                cin >> degree1;
+            }
 
-            // Adding a  Guest
-            cout << "\n3. Adding a guest 'Salem'\n";
-            manager.add_guest(Guest("Salem", "salem22@gmail.com", "2025-04-19"));
+            // creating a dynamic array to store the coefficients of the first polynomial
+            int *coeff1 = new int[degree1 + 2];
 
-            //Removing a guest
-            cout << "\n4. Removing the guest Mostafa...\n";
-            manager.remove_guest(Guest("Mostafa", "mostafa23@gmail.com", "2025-03-15"));
+            // inputting the coefficients of the first polynomial
+            input(degree1, coeff1);
 
-            // sorting the list
-            cout << "\n5. Sorting the list...\n";
-            manager.sort_guest_list();
-            manager.display_all_guests();
+            /// Input array 2
+            int degree2;
+            cout << "-> Please input the Order of the Second polynomial: ";
+            cin >> degree2;
 
-            // updating the list
-            cout << "\n6. Updating invitation for omar...\n";
-            manager.update_guest_invitation("Omar", "2025-03-18");
-            manager.display_all_guests();
+            // validation check on the input degree
+            while(cin.fail() || degree2 <= 0){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cerr << "Invalid input!! Please input a valid Order for the Second polynomial\n";
+                cin >> degree1;
+            }
 
-            //Updating the information of a non-existing guest
-            cout << "\n7. Updating a non existing guest...\n";
-            manager.update_guest_invitation("Khalid", "2025-03-12");
+            // making a dynamic array to store the coefficients of the first polynomial
+            int *coeff2 = new int[degree2 + 2];
 
-            //Sending reminder
-            cout << "\n8. Sending reminders...\n";
-            manager.send_reminder("2025-03-20");
-            cout << endl;
+            // inputting the coefficients of the second polynomial
+            input(degree2, coeff2);
+
+            cout << "\n--------------------------------------------------\n";
+            // displaying the polynomials in a readable format
+            cout << "First polynomial:";
+            Output(degree1, coeff1);
+            cout << "Second polynomial:";
+            Output(degree2, coeff2);
+
+            // calculating the sum of both polynomials
+            add(degree1, coeff1, degree2, coeff2);
+            // calculating the difference of both polynomials
+            subtract(degree1, coeff1, degree2, coeff2);
+
+            // deallocating the memory of the dynamic array of both polynomials
+            delete[] coeff1;
+            delete[] coeff2;
             continue;
-        }
 
-            // making the user enter the details of the guests he wants to invite
-        else if (choice == 2){
-            int number;
-            cout << "- Please enter the number of guests you want to invite: ";
-            while(true) {
-                // validation check to make sure the input is valid
-                cin >> number;
-                if (cin.fail()) {
-                    cerr << "Invalid input, please input a valid number!!\n";
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    continue;
-                }
-                else if(number<=0){
-                    cerr << "Please enter a valid integer greater that 0!!";
-                    continue;
-                }
-                else {
-                    break;
-                }
-            }
-
-            cin.ignore();
-            // inputting the guest details
-            for (int i = 0 ; i < number ; i++){
-                cout << "--> Please enter the Name, Email and Date of invitation of guest " << i+1 << ": \n";
-                cout << " Name: ";
-                getline(cin,name);
-
-                cout << "Contact: ";
-                //validation check on the input contact
-                getline(cin,contact);
-                while(!check_contact(contact)){
-                    cerr << "The input contact is invalid, please input either a phone number or an email\n";
-                    getline(cin,contact);
-                }
-
-                cout << "Invitation date: ";
-                // validation check on the input date
-                getline(cin,date);
-                while(!check_date(date)){
-                    cerr << "The input date is invalid, please input a suitable date (YYYY-MM-DD)\n";
-                    getline(cin,date);
-                }
-                manager.add_guest(Guest(name, contact, date));
-            }
-
-            // asking the user what operation he wants to perform on the guest list
-            while (true){
-                int number2;
-                cout << "\n-- What would you like to do with the guest list?\n"
-                     << "  1) Display the guest list\n"
-                     << "  2) Add a guest\n"
-                     << "  3) Remove a guest\n"
-                     << "  4) Send a reminder to a guest\n"
-                     << "  5) Sort the guest list\n"
-                     << "  6) Update the guest invitation\n"
-                     << "  7) Go back\n"
-                     << "--> Please enter your choice: ";
-                cin >> number2;
-                cin.ignore();
-
-                switch (number2) {
-                    // display the guest list
-                    case 1:
-                        cout << "\nDisplaying the guest list...\n";
-                        manager.display_all_guests();
-                        break;
-
-                        // adding a new guest to the list
-                    case 2:
-                        cout << "\nPlease enter the guest details of the new guest:\n";
-                        cout << " Name: ";
-                        getline(cin,name);
-
-                        cout << "Contact: ";
-                        //validation check on the input contact
-                        getline(cin,contact);
-                        while(!check_contact(contact)){
-                            cerr << "The input contact is invalid, please input either a phone number or an email\n";
-                            getline(cin,contact);
-                        }
-
-                        cout << "Invitation date: ";
-                        // validation check on the input date
-                        getline(cin,date);
-                        while(!check_date(date)){
-                            cerr << "The input date is invalid, please input a suitable date (YYYY-MM-DD)\n";
-                            getline(cin,date);
-                        }
-
-                        manager.add_guest(Guest(name, contact, date));
-                        break;
-
-                        // removing a guest from the list
-                    case 3:
-                        cout << "\nPlease enter the guest name you want to remove: ";
-                        getline(cin, name);
-                        manager.remove_guest(Guest(name, contact, date));
-                        break;
-
-                        // sending a reminder to a guest
-                    case 4:
-                        cout << "\nPlease enter the date you want to send a reminder for:";
-                        getline(cin, date);
-                        // validation check on the input date
-                        while(!check_date(date)){
-                            cerr << "\nThe input date is invalid, please input a suitable date (YYYY-MM-DD)\n";
-                            getline(cin,date);
-                        }
-
-                        cout << "\nSending reminders...\n";
-                        manager.send_reminder(date);
-                        break;
-
-                        // sorting the guest list
-                    case 5:
-                        manager.sort_guest_list();
-                        cout << "\nSorting the guest list...\n\n";
-                        manager.display_all_guests();
-                        break;
-
-                        // updating the guest invitation
-                    case 6:
-                        cout << "\nPlease enter the name of the guest you want to change the date of invitation: ";
-                        getline(cin, name);
-
-                        // validation check on the input date
-                        getline(cin,date);
-                        while(!check_date(date)){
-                            cerr << "\nThe input date is invalid, please input a suitable date (YYYY-MM-DD)\n";
-                            getline(cin,date);
-                        }
-                        cout << "\nUpdating the invitation for..." << name;
-                        manager.update_guest_invitation(name, date);
-                        break;
-
-                        // exiting
-                    case 7:
-                        break;
-
-                        // the user input an invalid choice
-                    default:
-                        cerr << "\nInvalid choice! Please enter a valid choice between 1 and 7\n";
-                        cin.clear(); // Clear the input
-                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                        continue;
-                }
-
-                // exiting and returning to main menu
-                if (number2 == 7) break;
-            }
-        }
-
-            // exiting the program
-        else if (choice == 3) {
-            cout << "Exiting...\n";
-            cout << "Thank you for using the program!!\nMay your Iftar gatherings be full of warmth and blessings!\n";
+            /// exiting the program
+        } else if (choice == 2) {
+            cout << "Exiting.......\n~~ Thank you for using the polynomial program ~~\n";
             break;
-        }
 
-            // invalid choice was input
+            /// validating the input
+        }
         else {
-            cerr << "\nInvalid choice! Please enter a valid choice between 1 and 3\n";
-            cin.clear(); // Clear the input
+            cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cerr << "Invalid input!! Please input a valid choice\n";
             continue;
         }
-
     }
     return 0;
 }
