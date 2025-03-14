@@ -43,6 +43,7 @@ StatisticalCalculation<T>::StatisticalCalculation(int size) : size(size) {
 template <typename T>
 StatisticalCalculation<T>::~StatisticalCalculation() {
     delete[] data;
+    data = nullptr;
 }
 
 template <typename T>

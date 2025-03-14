@@ -5,6 +5,8 @@
 using namespace std;
 
 /// function to swap
+
+#include <cstring>
 void swap (int &x , int &y){
     x = x ^ y ;
     y = x ^ y ;
@@ -54,7 +56,8 @@ SortingSystem<T>::SortingSystem(int n) {
 
 template <typename T>
 SortingSystem<T>::~SortingSystem() {
-    // Implementation here
+    delete[] data;
+    data = nullptr;
 }
 
 template <typename T>
@@ -119,8 +122,8 @@ int SortingSystem<int>::get_max() {
     return max_element;
 }
 
-template<>
-void SortingSystem<int>::countSort(const int &d){
+template<typename T>
+void SortingSystem<T>::countSort(const int &d){
 
     // base used for the radix sort
     const int base = 10;
@@ -272,8 +275,8 @@ void SortingSystem<int>::countSort(const int &d){
 template <typename T>
 void SortingSystem<T>::radixSort() {
 
-    // getting the maximum element in the array to know the number of digits of that number
-    // to know how many times the count sort function will be called
+    getting the maximum element in the array to know the number of digits of that number
+    to know how many times the count sort function will be called
     int max_element = get_max();
     // for each loop, sort the elements based on the least significant bit
     for(int d=1;max_element/d >0;d*=10){
@@ -281,10 +284,149 @@ void SortingSystem<T>::radixSort() {
     }
 }
 
+
 template <typename T>
 void SortingSystem<T>::bucketSort() {
-    // Implementation here
+    if (typeid(T) == typeid(int) || typeid(T) == typeid(float) || typeid(T) == typeid(double))
+    {
+        T maxValue = data[0];
+        T minValue = data[0];
+        for(int i = 1; i < size; i++){
+            if(data[i] > maxValue)
+                maxValue = data[i];
+            if(data[i] < minValue)
+                minValue = data[i];
+        }
+        cout << "max: " << maxValue << " min: " << minValue << endl;
+
+        int bucketCount = size;
+        T** buckets = new T*[bucketCount];
+        int* bucketSizes = new int[bucketCount]();
+
+        for (int i = 0; i < bucketCount; i++) {
+            buckets[i] = new T[size];
+        }
+        for (int i = 0; i < size; i++) {
+            int index = (bucketCount * (data[i] - minValue)) / (maxValue - minValue + 1);
+            buckets[index][bucketSizes[index]++] = data[i];
+        }
+        cout << "Unsorted buckets: " << endl;
+        for (int i = 0; i < bucketCount; i++) {
+            cout << "Bucket " << i << ": ";
+            for (int j = 0; j < bucketSizes[i]; j++) {
+                cout << buckets[i][j] << " ";
+            }
+            cout << endl;
+        }
+
+        cout << "Sorted buckets: " << endl;
+        for (int i = 0; i < bucketCount; i++) {
+            for (int j = 0; j < bucketSizes[i]; j++) {
+                for (int k = 0; k < bucketSizes[i] - j - 1; k++) {
+                    if (buckets[i][k] > buckets[i][k + 1]) {
+                        T temp = buckets[i][k];
+                        buckets[i][k] = buckets[i][k + 1];
+                        buckets[i][k + 1] = temp;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < bucketCount; i++) {
+            cout << "Bucket " << i << ": ";
+            for (int j = 0; j < bucketSizes[i]; j++) {
+                cout << buckets[i][j] << " ";
+            }
+            cout << endl;
+        }
+        cout << "Merged buckets: " << endl;
+        int index = 0;
+        for (int i = 0; i < bucketCount; i++) {
+            for (int j = 0; j < bucketSizes[i]; j++) {
+                data[index++] = buckets[i][j];
+            }
+        }
+        for (int i = 0; i < bucketCount; i++) {
+            delete[] buckets[i];
+        }
+        delete[] buckets;
+        delete[] bucketSizes;
+        for (int i = 0; i < size; i++) {
+            cout << data[i] << " ";
+        }cout << endl;
+    }
+    else if(typeid(T) == typeid(string)){
+        int bucketCount = 26;
+        T** buckets = new T*[bucketCount];
+        int* bucketSizes = new int[bucketCount]();
+    
+        for (int i = 0; i < bucketCount; i++) {
+            buckets[i] = new T[size];
+        }
+    
+        for (int i = 0; i < size; i++) {
+            int index = tolower(data[i][0]) - 'a';
+            if (index < 0 || index >= bucketCount) continue;
+            buckets[index][bucketSizes[index]++] = data[i];
+        }
+    
+        int index = 0;
+        for (int i = 0; i < bucketCount; i++) {
+            for (int j = 0; j < bucketSizes[i]; j++) {
+                data[index++] = buckets[i][j];
+            }
+            
+        }
+        
+    
+        cout << "Unsorted buckets: " << endl;
+        for (int i = 0; i < bucketCount; i++) {
+            cout << "Bucket " << i << ": ";
+            for (int j = 0; j < bucketSizes[i]; j++) {
+                cout << buckets[i][j] << " ";
+            }
+            cout << endl;
+        }
+    
+        cout << "Sorted buckets: " << endl;
+        for (int i = 0; i < bucketCount; i++) {
+            for (int j = 0; j < bucketSizes[i]; j++) {
+                for (int k = 0; k < bucketSizes[i] - j - 1; k++) {
+                    if (buckets[i][k] > buckets[i][k + 1]) {
+                        T temp = buckets[i][k];
+                        buckets[i][k] = buckets[i][k + 1];
+                        buckets[i][k + 1] = temp;
+                    }
+                }
+            }
+        }
+    
+        for (int i = 0; i < bucketCount; i++) {
+            cout << "Bucket " << i << ": ";
+            for (int j = 0; j < bucketSizes[i]; j++) {
+                cout << buckets[i][j] << " ";
+            }
+            cout << endl;
+        }
+    
+        index = 0;
+        for (int i = 0; i < bucketCount; i++) {
+            for (int j = 0; j < bucketSizes[i]; j++) {
+                data[index++] = buckets[i][j];
+            }
+        }
+    
+        for (int i = 0; i < bucketCount; i++) {
+            delete[] buckets[i];
+        }
+        delete[] buckets;
+        delete[] bucketSizes;
+        
+        displaySortedData();
+    }
+    
+   
 }
+
 
 template <typename T>
 void SortingSystem<T>::merge(int left, int mid, int right) {
@@ -299,7 +441,7 @@ int SortingSystem<T>::partition(int low, int high) {
 
 template <typename T>
 void SortingSystem<T>::displayData() {
-    cout << "Initial Data: [";
+    cout << "[";
     for (int i = 0; i < size; i++) {
         cout << data[i];
         if (i < size - 1) {
@@ -309,6 +451,7 @@ void SortingSystem<T>::displayData() {
     cout << "]"<<endl;
 
 }
+
 template <typename T>
 void SortingSystem<T>::displaySortedData() {
     cout << "Sorted Data: [";
@@ -347,15 +490,15 @@ void SortingSystem<T>::showMenu() {
     cout << "\n";
     int choice;
     cout << "- Please select a sorting algorithm:\n";
-    cout << "1. Insertion Sort\n";
-    cout << "2. Selection Sort\n";
-    cout << "3. Bubble Sort\n";
-    cout << "4. Shell Sort\n";
-    cout << "5. Merge Sort\n";
-    cout << "6. Quick Sort\n";
-    cout << "7. Count Sort (Only for integers)\n";
-    cout << "8. Radix Sort (Only for integers)\n";
-    cout << "9. Bucket Sort\n";
+    cout << "   1. Insertion Sort\n";
+    cout << "   2. Selection Sort\n";
+    cout << "   3. Bubble Sort\n";
+    cout << "   4. Shell Sort\n";
+    cout << "   5. Merge Sort\n";
+    cout << "   6. Quick Sort\n";
+    cout << "   7. Count Sort (Only for integers)\n";
+    cout << "   8. Radix Sort (Only for integers)\n";
+    cout << "   9. Bucket Sort\n";
 
     cout << "Enter your choice (1-9): ";
 
@@ -425,7 +568,6 @@ int main() {
 
     char choice;
     do {
-        // asking the user to input the number of elements he wants to sort
         int size;
         cout << "- Please enter the number of items to sort: ";
 
@@ -436,7 +578,7 @@ int main() {
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
 
-        SortingSystem<int> sorter(size);
+        SortingSystem<string> sorter(size);
         sorter.showMenu();
 
         // asking the user if he wants to continue using the system or to exit
@@ -452,5 +594,6 @@ int main() {
         }
 
     } while (choice == 'y' || choice == 'Y');
-     return 0;
+    return 0;
 }
+    
