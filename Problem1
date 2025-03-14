@@ -1,7 +1,6 @@
 // Problem 1: Fatima's Iftar Gathering
 
 #include <iostream>
-#include <list>
 #include <limits>
 using namespace std;
 
@@ -11,7 +10,8 @@ class Guest{
     string contact;
     string iftar_date;
 public:
-
+    // default constructor
+    Guest() = default;
     // parameterized constructor
     Guest(const string& guest_name, const string& guest_contact, const string& invite_date) {
         name = guest_name;
@@ -39,87 +39,84 @@ public:
 
 // class to manage the invitations
 class IftarManager{
-    list<Guest> guest_list;
+    Guest* guest_list;
+    int size , capacity;
+    void resize(){
+        capacity *= 2;
+        Guest* new_list = new Guest[capacity];
+        for (size_t i = 0; i < size; ++i) {
+            new_list[i] = guest_list[i];
+        }
+        delete[] guest_list;
+        guest_list = new_list;
+    }
 public:
 
     // adding a guest to the list
     void add_guest(Guest guest){
-        auto it = guest_list.begin();
-        // checking if the input name has been added before
-        while (it != guest_list.end()) {
-            if (it->get_contact() == guest.get_contact()) {
+        for(int i = 0 ; i < size ; i++){
+            if (guest_list[i].get_contact() == guest.get_contact()) {
                 cerr << "\nError: A guest with the same contact details is already in the guest list.\n" << endl;
                 return;
             }
-            it++;
+        }
+        if (size >= capacity) {
+            resize();
         }
         // else storing the information of the guest
-        guest_list.insert(it, guest);
+        guest_list[size++] = guest;
         cout << "-> " << guest.get_name() << " has been added to the guest list.\n" << endl;
     }
 
     // removing a gust from the list
     void remove_guest(Guest guest){
-        auto it = guest_list.begin();
-        bool found = false;
-        while (it != guest_list.end()) {
-            if (it->get_name() == guest.get_name()) {
-                found = true;
-                break;
+        for(int i = 0 ; i < size; i++) {
+            if (guest_list[i].get_name() == guest.get_name()) {
+                for (int j = i; j < size - 1; j++) {
+                    guest_list[j] = guest_list[j + 1];
+                }
+                size--;
+                cout << "-> " << guest.get_name() << " has been removed from the guest list.\n";
+                return;
             }
-            it++;
         }
-
-        // shifting the guests to remove a guest
-        if (found) {
-            auto next_it = it;
-            next_it++;
-            while (next_it != guest_list.end()) {
-                *it = *next_it;
-                it++;
-                next_it++;
-            }
-            guest_list.pop_back();
-            cout << "-> " << guest.get_name() << " has been removed from the guest list.\n";
-        } else {
-            cerr << "-> Guest " << guest.get_name() << " hasn't been found in the list.\n\n";
-        }
+        cerr << "-> Guest " << guest.get_name() << " hasn't been found in the list.\n";
     }
 
     // displaying the guest list
     void display_all_guests(){
-        if(guest_list.empty()){
+        if(size == 0){
             cout << "===== Guest List =====\n";
             cout << "'The guest list is empty'\n";
-            cout << "======================\n\n";
+            cout << "======================\n";
         }
         else {
             cout << "===== Guest List =====\n";
-            for (Guest g: guest_list) {
-                g.display_guest();
+            for (int i = 0 ; i < size ; i++) {
+                guest_list[i].display_guest();
             }
-            cout << "======================\n\n";
+            cout << "======================\n";
         }
     }
 
     // updating the invitation date of a guest
     void update_guest_invitation(const string& name, const string& new_date) {
-        for (Guest& g : guest_list) {
-            if (g.get_name() == name) {
-                g.update_invitation(new_date);
+        for (int i = 0; i < size; i++) {
+            if (guest_list[i].get_name() == name) {
+                guest_list[i].update_invitation(new_date);
                 return;
             }
         }
-        cerr << "These is no guest with this name\n";
+        cerr << "There is no guest with this name\n";
     }
 
     // sending reminders according to the input date
     void send_reminder(const string& date){
         bool found = false;
-        for (auto guest : guest_list) {
-            if (guest.get_iftar_date() == date) {
-                cout << "Reminder sent to " << guest.get_name()
-                     << ": Your Iftar invitation is on "<< date << "!\n\n";
+        for (size_t i = 0; i < size; ++i) {
+            if (guest_list[i].get_iftar_date() == date) {
+                cout << "Reminder sent to " << guest_list[i].get_name()
+                     << ": Your Iftar invitation is on "<< date << "!\n";
                 found = true;
             }
         }
@@ -130,23 +127,22 @@ public:
 
     // Sorting the guest list by selection sort algorithm
     void sort_guest_list() {
-        //auto it;
-        for (auto it = guest_list.begin(); it != guest_list.end(); it++) {
-            auto least = it;
-            for (auto j = next(it); j != guest_list.end(); j++) {
-                if (j->get_iftar_date() < least->get_iftar_date()) {
+        for (int i = 0; i < size - 1; i++) {
+            int least = i;
+            for (int j = i + 1; j < size; j++) {
+                if (guest_list[j].get_iftar_date() < guest_list[least].get_iftar_date()) {
                     least = j;
                 }
             }
-            if (least != it) {
-                swap(*it, *least);
+            if (least != i) {
+                swap(guest_list[i], guest_list[least]);
             }
         }
     }
 
     // clearing the guest list
     void clearlist(){
-        guest_list.begin() = guest_list.end();
+        size = 0;
     }
 };
 
@@ -161,7 +157,7 @@ bool check_contact(const string &contact){
         return true;
     }
 
-    // else check if the contact was an email
+        // else check if the contact was an email
     else {
         // searching for the '@' in the input
         size_t p = contact.find('@');
@@ -228,7 +224,7 @@ bool check_date(const string &date){
 
     // checking if the input month is feb and if the year is a leap year
     if(intyear % 4 ==0 && intmonth == 2 && intday >29)return false;
-    // the year is not a leap year
+        // the year is not a leap year
     else if(intmonth == 2 && intday>28) return false;
     return true;
 }
@@ -240,9 +236,9 @@ int main() {
     string name , contact , date;
     Guest guest(name , contact , date);
 
-    cout << "\n--------------------------------------------------------\n";
+    cout << "\n--------------------------------------------------------------------\n";
     cout << "======== Welcome To Fatima's Iftar Invitation manager ;) ========\n";
-    cout << "--------------------------------------------------------\n";
+    cout << "----------------------------------------------------------------------\n";
 
     // menu to choose what the user wants to do
     while (true) {
@@ -269,6 +265,10 @@ int main() {
             cout << "\n3. Adding a duplicate guest 'Omar'\n";
             manager.add_guest(Guest("Omar", "omarR@gmail.com", "2025-03-10"));
 
+            // Adding a  Guest
+            cout << "\n3. Adding a guest 'Salem'\n";
+            manager.add_guest(Guest("Salem", "salem22@gmail.com", "2025-04-19"));
+
             //Removing a guest
             cout << "\n4. Removing the guest Mostafa...\n";
             manager.remove_guest(Guest("Mostafa", "mostafa23@gmail.com", "2025-03-15"));
@@ -280,7 +280,6 @@ int main() {
 
             // updating the list
             cout << "\n6. Updating invitation for omar...\n";
-
             manager.update_guest_invitation("Omar", "2025-03-18");
             manager.display_all_guests();
 
@@ -295,7 +294,7 @@ int main() {
             continue;
         }
 
-         // making the user enter the details of the guests he wants to invite
+            // making the user enter the details of the guests he wants to invite
         else if (choice == 2){
             int number;
             cout << "- Please enter the number of guests you want to invite: ";
@@ -321,7 +320,7 @@ int main() {
             // inputting the guest details
             for (int i = 0 ; i < number ; i++){
                 cout << "--> Please enter the Name, Email and Date of invitation of guest " << i+1 << ": \n";
-                cout << "Name: ";
+                cout << " Name: ";
                 getline(cin,name);
 
                 cout << "Contact: ";
@@ -367,7 +366,7 @@ int main() {
                         // adding a new guest to the list
                     case 2:
                         cout << "\nPlease enter the guest details of the new guest:\n";
-                        cout << "Name: ";
+                        cout << " Name: ";
                         getline(cin,name);
 
                         cout << "Contact: ";
@@ -401,13 +400,12 @@ int main() {
                         cout << "\nPlease enter the date you want to send a reminder for:";
                         getline(cin, date);
                         // validation check on the input date
-                        getline(cin,date);
                         while(!check_date(date)){
                             cerr << "\nThe input date is invalid, please input a suitable date (YYYY-MM-DD)\n";
                             getline(cin,date);
                         }
 
-                        cout << "\nSending reminders...";
+                        cout << "\nSending reminders...\n";
                         manager.send_reminder(date);
                         break;
 
@@ -457,9 +455,12 @@ int main() {
             break;
         }
 
-        // invalid choice was input
+            // invalid choice was input
         else {
-            cerr << "Invalid choice! Try again.\n";
+            cerr << "\nInvalid choice! Please enter a valid choice between 1 and 3\n";
+            cin.clear(); // Clear the input
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
         }
 
     }
