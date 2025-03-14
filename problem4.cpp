@@ -1,6 +1,11 @@
 // Problem 4: Sorting Algorithms
-
+#include <algorithm>
 #include <iostream>
+#include <limits>
+#include <typeinfo>
+#include <iostream>
+#include <typeinfo>
+#include <string>
 #include <limits>
 using namespace std;
 
@@ -21,7 +26,7 @@ private:
 
 public:
     // Constructor & Destructor
-    SortingSystem(int n);
+    SortingSystem(int n, T* data);
     ~SortingSystem();
 
     // Sorting Algorithms
@@ -48,9 +53,17 @@ public:
 };
 
 template <typename T>
-SortingSystem<T>::SortingSystem(int n) {
+SortingSystem<T>::SortingSystem(int n, T* data) {
     size = n;
-    data = new T[size];
+    this->data = new T[size];
+    for (int i = 0; i < size; i++) {
+        this->data[i] = data[i];
+    }
+    for (int i = 0; i < size; i++)
+    {
+        cout << "Data " << i + 1 << ": " << this->data[i] << endl;
+    }
+    
 }
 
 
@@ -125,163 +138,194 @@ int SortingSystem<int>::get_max() {
 template<typename T>
 void SortingSystem<T>::countSort(const int &d){
 
-    // base used for the radix sort
-    const int base = 10;
+    if(is_same<T, int>::value){
+        if constexpr (is_same<T, int>::value) {
+            // base used for the radix sort
+            const int base = 10;
 
-    // storing the max element
-    int max_element = get_max();
+            // storing the max element
+            int max_element = get_max();
 
-    // creating a dynamic array to store the frequency of each element
-    int*freq;
+            // creating a dynamic array to store the frequency of each element
+            int*freq;
 
-    // creating a dynamic array to store the result after sorting
-    int *result = new int [this->size]();
+            // creating a dynamic array to store the result after sorting
+            int *result = new int [this->size]();
 
-    // count sort is called
-    if(d==0){
+            // count sort is called
+            if(d==0){
 
-        // the size of the frequency array = max_element + 1 as the array is zero based
-        freq = new int[max_element+1]();
-        for(int i = 0;i<max_element;i++){
-            freq[i] =0;
-        }
+                // the size of the frequency array = max_element + 1 as the array is zero based
+                freq = new int[max_element+1]();
+                for(int i = 0;i<max_element;i++){
+                    freq[i] =0;
+                }
 
-        cout << "\n1. Creating a frequency array to store the frequency of each element\n";
-        // calculating the frequency of each value
-        for(int j=0;j< this->size;j++){
-            freq[data[j]] = freq[data[j]] +1;
-        }
+                cout << "\n1. Creating a frequency array to store the frequency of each element\n";
+                // calculating the frequency of each value
+                for(int j=0;j< this->size;j++){
+                    freq[data[j]] = freq[data[j]] +1;
+                }
 
-        // Display frequency array
-        cout << "Frequency Array: [";
-        for (int i = 0; i <= max_element; i++) {
-            cout << freq[i] << " ";
-        }
-        cout << "]\n\n";
+                // Display frequency array
+                cout << "Frequency Array: [";
+                for (int i = 0; i <= max_element; i++) {
+                    cout << freq[i] << " ";
+                }
+                cout << "]\n\n";
 
-        cout << "2. Calculating the cumulative frequency to know how many elements are less than or equal each element\n";
-        // calculating the cumulative frequency to know how many elements are less than or equal each element
-        for(int i=1;i<=max_element;i++){
-            freq[i] = freq[i] + freq[i-1];
-        }
+                cout << "2. Calculating the cumulative frequency to know how many elements are less than or equal each element\n";
+                // calculating the cumulative frequency to know how many elements are less than or equal each element
+                for(int i=1;i<=max_element;i++){
+                    freq[i] = freq[i] + freq[i-1];
+                }
 
-        // Display cumulative frequency array
-        cout << "Cumulative Frequency Array: [";
-        for (int i = 0; i <= max_element; i++) {
-            cout << freq[i] << " ";
-        }
-        cout << "]\n\n";
+                // Display cumulative frequency array
+                cout << "Cumulative Frequency Array: [";
+                for (int i = 0; i <= max_element; i++) {
+                    cout << freq[i] << " ";
+                }
+                cout << "]\n\n";
 
-        cout << "The array before sorting\n";
-        displayData();
-        cout << endl;
-        // storing the sorted numbers in the result array
-        for(int i=this->size-1;i>=0;i--){
-            result[freq[data[i]]-1] = data[i];
+                cout << "The array before sorting\n";
+                displayData();
+                cout << endl;
+                // storing the sorted numbers in the result array
+                for(int i=this->size-1;i>=0;i--){
+                    result[freq[data[i]]-1] = data[i];
 
-            // Display the array after each interation
-            cout << "- Placing [" << data[i] << "] at position : " << (freq[data[i]]-1)+1<< "\n";
-            cout << "  Sorted Array: [";
-            for (int j = 0; j < this->size; j++) {
-                cout << result[j];
-                if (j < this->size - 1) cout << " ";
+                    // Display the array after each interation
+                    cout << "- Placing [" << data[i] << "] at position : " << (freq[data[i]]-1)+1<< "\n";
+                    cout << "  Sorted Array: [";
+                    for (int j = 0; j < this->size; j++) {
+                        cout << result[j];
+                        if (j < this->size - 1) cout << " ";
+                    }
+                    cout << "] \n";
+                    freq[data[i]]= freq[data[i]]-1;
+                }
+                cout << "\n- This is a non comparative algorithm as it doesn't compare the elements directly, it takes:\n"
+                    << "  Best case: O(n + k)\n"
+                    << "  Average case: O(n + k)\n"
+                    << "  Worst case: O(n + k)\n"
+                    << "  where n is the number of elements and k is the range of input.\n\n";
+                // radix sort was called
+            }else {
+
+                // dynamically allocating a frequency array
+                freq = new int[base];
+
+                // initialize the freq array to zero
+                for (int i = 0; i < base; i++) {
+                    freq[i] = 0;
+                }
+
+                cout << "\n1. Creating a frequency array to store the frequency of each least significant digit\n";
+                // Count the occurrences of each digit -> the least significant bit
+                for (int i = 0; i < this->size; i++) {
+                    int digit = (data[i] / d) % base;
+                    freq[digit]++;
+                }
+
+                // Display frequency array
+                cout << "Frequency Array for digit " << d << " [ ";
+                for (int i = 0; i < base; i++) {
+                    cout << freq[i] << " ";
+                }
+                cout << "]\n\n";
+
+                cout << "2. Calculating the cumulative frequency for each digit\n";
+                // calculating the cumulative frequency for each digit
+                for (int i = 1; i < base; i++) {
+                    freq[i] += freq[i - 1];
+                }
+
+                // Display cumulative frequency array
+                cout << "Cumulative Frequency Array for digit " << d << " [ ";
+                for (int i = 0; i < base; i++) {
+                    cout << freq[i] << " ";
+                }
+                cout << "]\n\n";
+
+                cout << "The array before sorting\n";
+                displayData();
+                cout << endl;
+                // storing the sorted numbers in the result array
+                for (int i = this->size - 1; i >= 0; i--) {
+                    int digit = (data[i] / d) % base;
+                    result[freq[digit] - 1] = data[i];
+
+                    // Display the array after each interation
+                    cout << "- Placing [" << data[i] << "] at position : " << (freq[digit]-1)+1<< "\n";
+                    cout << "  Sorted Array: [";
+                    for (int j = 0; j < this->size; j++) {
+                        cout << result[j];
+                        if (j < this->size - 1) cout << " ";
+                    }
+                    cout << "]\n";
+                    freq[digit]--;
+
+                }
+                cout << "\nThis is a divide-and-conquer algorithm which takes:\n"
+                    << "Best case: O(n log n)\n"
+                    << "Average case: O(n log n)\n"
+                    << "Worst case: O(n^2)\n"
+                    << "where n is the number of elements.\n\n";
             }
-            cout << "] \n";
-            freq[data[i]]= freq[data[i]]-1;
-        }
-        cout << "\n- This is a non comparative algorithm as it doesn't compare the elements directly, it takes:\n"
-             << "  Best case: O(n + k)\n"
-             << "  Average case: O(n + k)\n"
-             << "  Worst case: O(n + k)\n"
-             << "  where n is the number of elements and k is the range of input.\n\n";
-        // radix sort was called
-    }else {
 
-        // dynamically allocating a frequency array
-        freq = new int[base];
 
-        // initialize the freq array to zero
-        for (int i = 0; i < base; i++) {
-            freq[i] = 0;
-        }
-
-        cout << "\n1. Creating a frequency array to store the frequency of each least significant digit\n";
-        // Count the occurrences of each digit -> the least significant bit
-        for (int i = 0; i < this->size; i++) {
-            int digit = (data[i] / d) % base;
-            freq[digit]++;
-        }
-
-        // Display frequency array
-        cout << "Frequency Array for digit " << d << " [ ";
-        for (int i = 0; i < base; i++) {
-            cout << freq[i] << " ";
-        }
-        cout << "]\n\n";
-
-        cout << "2. Calculating the cumulative frequency for each digit\n";
-        // calculating the cumulative frequency for each digit
-        for (int i = 1; i < base; i++) {
-            freq[i] += freq[i - 1];
-        }
-
-        // Display cumulative frequency array
-        cout << "Cumulative Frequency Array for digit " << d << " [ ";
-        for (int i = 0; i < base; i++) {
-            cout << freq[i] << " ";
-        }
-        cout << "]\n\n";
-
-        cout << "The array before sorting\n";
-        displayData();
-        cout << endl;
-        // storing the sorted numbers in the result array
-        for (int i = this->size - 1; i >= 0; i--) {
-            int digit = (data[i] / d) % base;
-            result[freq[digit] - 1] = data[i];
-
-            // Display the array after each interation
-            cout << "- Placing [" << data[i] << "] at position : " << (freq[digit]-1)+1<< "\n";
-            cout << "  Sorted Array: [";
-            for (int j = 0; j < this->size; j++) {
-                cout << result[j];
-                if (j < this->size - 1) cout << " ";
+            // Copy the sorted elements back to the original array
+            for (int i = 0; i < this->size; i++) {
+                data[i] = result[i];
             }
-            cout << "]\n";
-            freq[digit]--;
 
+            // displaying the sorted elements
+            displaySortedData();
+
+            // deallocating the memory
+            delete [] result;
+            delete [] freq;
+        } else {
+            cout << "Count Sort is only for integers!\n";
+            return;
         }
-        cout << "\nThis is a divide-and-conquer algorithm which takes:\n"
-             << "Best case: O(n log n)\n"
-             << "Average case: O(n log n)\n"
-             << "Worst case: O(n^2)\n"
-             << "where n is the number of elements.\n\n";
     }
 
 
-    // Copy the sorted elements back to the original array
-    for (int i = 0; i < this->size; i++) {
-        data[i] = result[i];
-    }
 
-    // displaying the sorted elements
-    displaySortedData();
-
-    // deallocating the memory
-    delete [] result;
-    delete [] freq;
+    
 }
 
 template <typename T>
 void SortingSystem<T>::radixSort() {
 
-    getting the maximum element in the array to know the number of digits of that number
-    to know how many times the count sort function will be called
-    int max_element = get_max();
-    // for each loop, sort the elements based on the least significant bit
-    for(int d=1;max_element/d >0;d*=10){
-        countSort(d);
+    if(is_same<T, int>::value)
+    {
+        if constexpr (is_same<T, int>::value) {
+            // base used for the radix sort
+            const int base = 10;
+
+            // getting the maximum element in the array to know the number of digits of that number
+            // to know how many times the count sort function will be called
+            int max_element = get_max();
+
+            // for each loop, sort the elements based on the least significant bit
+            for(int d=1;max_element/d >0;d*=10){
+                countSort(d);
+            }
+        } else {
+            cout << "Radix Sort is only for integers!\n";
+            return;
+        }
     }
+
+    // getting the maximum element in the array to know the number of digits of that number
+    // to know how many times the count sort function will be called
+    // int max_element = get_max();
+    // // for each loop, sort the elements based on the least significant bit
+    // for(int d=1;max_element/d >0;d*=10){
+    //     countSort(d);
+    // }
 }
 
 
@@ -307,8 +351,12 @@ void SortingSystem<T>::bucketSort() {
             buckets[i] = new T[size];
         }
         for (int i = 0; i < size; i++) {
-            int index = (bucketCount * (data[i] - minValue)) / (maxValue - minValue + 1);
-            buckets[index][bucketSizes[index]++] = data[i];
+            if constexpr (is_same<T, int>::value || is_same<T, float>::value || is_same<T, double>::value) {
+                int index = (bucketCount * (data[i] - minValue)) / (maxValue - minValue + 1);
+                buckets[index][bucketSizes[index]++] = data[i];            
+            } else {
+                cout << "Bucket sort for non-numeric types is not supported in this branch.\n";
+            }
         }
         cout << "Unsorted buckets: " << endl;
         for (int i = 0; i < bucketCount; i++) {
@@ -364,9 +412,14 @@ void SortingSystem<T>::bucketSort() {
         }
     
         for (int i = 0; i < size; i++) {
-            int index = tolower(data[i][0]) - 'a';
-            if (index < 0 || index >= bucketCount) continue;
-            buckets[index][bucketSizes[index]++] = data[i];
+            if(is_same<T, string>::value){
+                if constexpr (is_same<T, string>::value) {
+                    int index = data[i][0] - 'a';
+                    buckets[index][bucketSizes[index]++] = data[i];
+                } else {
+                    cout << "Bucket sort for non-string types is not supported in this branch.\n";
+                }
+            }
         }
     
         int index = 0;
@@ -476,18 +529,6 @@ template <typename T>
 void SortingSystem<T>::showMenu() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    // making the user input the data he wants to sort
-    for (int i = 0; i < size; i++)
-    {
-        cout << "- Enter data " << i + 1 << ": ";
-        while (!(cin >> data[i])) {
-            cout << "Invalid input. Please enter a valid number: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-    }
-
-    cout << "\n";
     int choice;
     cout << "- Please select a sorting algorithm:\n";
     cout << "   1. Insertion Sort\n";
@@ -562,7 +603,11 @@ void SortingSystem<T>::showMenu() {
 
 }
 
-/// main menu to check if the user wants to keep sorting or to exit
+
+bool isNumber(const string& s) {
+    return all_of(s.begin(), s.end(), ::isdigit);
+}
+
 int main() {
     cout << "\n===== Welcome to the 'Sorting Program' =====\n";
 
@@ -570,30 +615,115 @@ int main() {
     do {
         int size;
         cout << "- Please enter the number of items to sort: ";
-
-        // validation check on the input
-        while (!(cin >> size) || size <=0) {
+        
+        while (!(cin >> size) || size <= 0) {
             cout << "Invalid input. Please enter a valid positive integer greater than 0: ";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
 
-        SortingSystem<string> sorter(size);
-        sorter.showMenu();
+        string DataType;
+        cout << "Enter Data 1: ";
+        
+        cin.ignore(); 
 
-        // asking the user if he wants to continue using the system or to exit
+        string temp;
+        getline(cin, temp);
+
+        if (isNumber(temp)) {
+            DataType = "int";
+        } else {
+            try {
+                stof(temp);
+                DataType = "float";
+            } catch (...) {
+                DataType = "string";
+            }
+        }
+
+        void* data = nullptr;
+
+        if (DataType == "int") {
+            data = new int[size];
+            static_cast<int*>(data)[0] = stoi(temp);
+        } else if (DataType == "float") {
+            data = new float[size];
+            static_cast<float*>(data)[0] = stof(temp);
+        } else if (DataType == "string") {
+            data = new string[size];
+            static_cast<string*>(data)[0] = temp;
+        } else {
+            cout << "Unsupported data type!\n";
+            return 1;
+        }
+
+        for (int i = 1; i < size; i++) {
+            cout << "Enter Data " << i + 1 << ": ";
+            if (DataType == "int") {
+                string input;
+                while (true) {
+                    cin >> input;
+                    if (isNumber(input)) {
+                        static_cast<int*>(data)[i] = stoi(input);
+                        break;
+                    } else {
+                        cout << "Invalid input. Please enter a valid integer: ";
+                        cin.clear();
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    }
+                }
+            } else if (DataType == "float") {
+                string input;
+                while (true) {
+                    cin >> input;
+                    try {
+                        static_cast<float*>(data)[i] = stof(input);
+                        break;
+                    } catch (...) {
+                        cout << "Invalid input. Please enter a valid float number: ";
+                        cin.clear();
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    }
+                }
+            } else if (DataType == "string") {
+                // cin.ignore();
+                getline(cin, static_cast<std::string*>(data)[i]);
+            }
+        }
+
+        if (DataType == "int") {
+            SortingSystem<int> sorter(size, static_cast<int*>(data));
+            sorter.showMenu();
+        } else if (DataType == "float") {
+            SortingSystem<float> sorter(size, static_cast<float*>(data));
+            sorter.showMenu();
+        } else if (DataType == "string") {
+            SortingSystem<string> sorter(size, static_cast<string*>(data));
+            sorter.showMenu();
+        } else {
+            cout << "Invalid choice!\n";
+        }
+
+        if (DataType == "int") {
+            delete[] static_cast<int*>(data);
+        } else if (DataType == "float") {
+            delete[] static_cast<float*>(data);
+        } else if (DataType == "string") {
+            delete[] static_cast<string*>(data);
+        }
+
         cout << "\n\n- Do you want to sort another dataset? (y/n): ";
         while (!(cin >> choice) || (choice != 'y' && choice != 'Y' && choice != 'n' && choice != 'N')) {
             cout << "Invalid input. Please enter 'y' or 'n': ";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
-        if(choice == 'N' || choice == 'n'){
-            cout << "\n-- Thank you for using the sorting system! Goodbye!";
+        if (choice == 'N' || choice == 'n') {
+            cout << "\n-- Thank you for using the sorting system! Goodbye!\n";
             break;
         }
 
     } while (choice == 'y' || choice == 'Y');
+
     return 0;
 }
-    
