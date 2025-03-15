@@ -3,12 +3,15 @@
 #include <iostream>
 #include <limits>
 #include <typeinfo>
+#include <chrono>
 #include <iostream>
 #include <typeinfo>
 #include <string>
 #include <limits>
 #include <cstring>
 using namespace std;
+
+/// function to swap
 
 void swap (int &x , int &y){
     x = x ^ y ;
@@ -47,6 +50,7 @@ public:
     void displaySortedData();
     void measureSortTime(void (SortingSystem::*sortFunc)());
     void showMenu();
+    int get_max(); // used to return the maximum number for the count and radix sort
 };
 
 template <typename T>
@@ -55,11 +59,7 @@ SortingSystem<T>::SortingSystem(int n, T* data) {
     this->data = new T[size];
     for (int i = 0; i < size; i++) {
         this->data[i] = data[i];
-    }
-    for (int i = 0; i < size; i++)
-    {
-        cout << "Data " << i + 1 << ": " << this->data[i] << endl;
-    }
+    }    
 }
 
 
@@ -119,40 +119,48 @@ void SortingSystem<T>::quickSort(int left, int right) {
     // Implementation here
 }
 
+/// function used to return the maximum element in the input data
+template<>
+int SortingSystem<int>::get_max() {
+    int max_element = data[0];
+    for(int i=0;i<this->size;i++){
+        if(data[i]>max_element){
+            max_element = data[i];
+        }
+    }
+    return max_element;
+}
+
 template<typename T>
 void SortingSystem<T>::countSort(const int &d){
 
-    if(is_same<T, int>::value) {
+    if(is_same<T, int>::value){
         if constexpr (is_same<T, int>::value) {
             // base used for the radix sort
             const int base = 10;
 
             // storing the max element
-            int max_element = data[0];
-            for (int i = 0; i < this->size; i++) {
-                if (data[i] > max_element) {
-                    max_element = data[i];
-                }
-            }
+            int max_element = get_max();
 
             // creating a dynamic array to store the frequency of each element
-            int *freq;
+            int*freq;
+
             // creating a dynamic array to store the result after sorting
-            int *result = new int[this->size]();
+            int *result = new int [this->size]();
 
             // count sort is called
-            if (d == 0) {
+            if(d==0){
 
                 // the size of the frequency array = max_element + 1 as the array is zero based
-                freq = new int[max_element + 1]();
-                for (int i = 0; i < max_element; i++) {
-                    freq[i] = 0;
+                freq = new int[max_element+1]();
+                for(int i = 0;i<max_element;i++){
+                    freq[i] =0;
                 }
 
                 cout << "\n1. Creating a frequency array to store the frequency of each element\n";
                 // calculating the frequency of each value
-                for (int j = 0; j < this->size; j++) {
-                    freq[data[j]] = freq[data[j]] + 1;
+                for(int j=0;j< this->size;j++){
+                    freq[data[j]] = freq[data[j]] +1;
                 }
 
                 // Display frequency array
@@ -162,11 +170,10 @@ void SortingSystem<T>::countSort(const int &d){
                 }
                 cout << "]\n\n";
 
-                cout
-                        << "2. Calculating the cumulative frequency to know how many elements are less than or equal each element\n";
+                cout << "2. Calculating the cumulative frequency to know how many elements are less than or equal each element\n";
                 // calculating the cumulative frequency to know how many elements are less than or equal each element
-                for (int i = 1; i <= max_element; i++) {
-                    freq[i] = freq[i] + freq[i - 1];
+                for(int i=1;i<=max_element;i++){
+                    freq[i] = freq[i] + freq[i-1];
                 }
 
                 // Display cumulative frequency array
@@ -180,29 +187,28 @@ void SortingSystem<T>::countSort(const int &d){
                 displayData();
                 cout << endl;
                 // storing the sorted numbers in the result array
-                for (int i = this->size - 1; i >= 0; i--) {
-                    result[freq[data[i]] - 1] = data[i];
+                for(int i=this->size-1;i>=0;i--){
+                    result[freq[data[i]]-1] = data[i];
 
                     // Display the array after each interation
-                    cout << "- Placing [" << data[i] << "] at position : " << (freq[data[i]] - 1) + 1 << "\n";
+                    cout << "- Placing [" << data[i] << "] at position : " << (freq[data[i]]-1)+1<< "\n";
                     cout << "  Sorted Array: [";
                     for (int j = 0; j < this->size; j++) {
                         cout << result[j];
                         if (j < this->size - 1) cout << " ";
                     }
                     cout << "] \n";
-                    freq[data[i]] = freq[data[i]] - 1;
+                    freq[data[i]]= freq[data[i]]-1;
                 }
-                cout
-                        << "\n- This is a non comparative algorithm as it doesn't compare the elements directly, it takes:\n"
-                        << "  Best case: O(n + k)\n"
-                        << "  Average case: O(n + k)\n"
-                        << "  Worst case: O(n + k)\n"
-                        << "  where n is the number of elements and k is the range of input.\n\n";
-
+                cout << "\n- This is a non comparative algorithm as it doesn't compare the elements directly, it takes:\n"
+                    << "  Best case: O(n + k)\n"
+                    << "  Average case: O(n + k)\n"
+                    << "  Worst case: O(n + k)\n"
+                    << "  where n is the number of elements and k is the range of input.\n\n";
                 // radix sort was called
-            } else {
-                // dynamically allocating a frequency array for the radix sort
+            }else {
+
+                // dynamically allocating a frequency array
                 freq = new int[base];
 
                 // initialize the freq array to zero
@@ -246,7 +252,7 @@ void SortingSystem<T>::countSort(const int &d){
                     result[freq[digit] - 1] = data[i];
 
                     // Display the array after each interation
-                    cout << "- Placing [" << data[i] << "] at position : " << (freq[digit] - 1) + 1 << "\n";
+                    cout << "- Placing [" << data[i] << "] at position : " << (freq[digit]-1)+1<< "\n";
                     cout << "  Sorted Array: [";
                     for (int j = 0; j < this->size; j++) {
                         cout << result[j];
@@ -257,11 +263,12 @@ void SortingSystem<T>::countSort(const int &d){
 
                 }
                 cout << "\nThis is a divide-and-conquer algorithm which takes:\n"
-                     << "Best case: O(n log n)\n"
-                     << "Average case: O(n log n)\n"
-                     << "Worst case: O(n^2)\n"
-                     << "where n is the number of elements.\n\n";
+                    << "Best case: O(n log n)\n"
+                    << "Average case: O(n log n)\n"
+                    << "Worst case: O(n^2)\n"
+                    << "where n is the number of elements.\n\n";
             }
+
 
             // Copy the sorted elements back to the original array
             for (int i = 0; i < this->size; i++) {
@@ -272,42 +279,52 @@ void SortingSystem<T>::countSort(const int &d){
             displaySortedData();
 
             // deallocating the memory
-            delete[] result;
-            delete[] freq;
-        }
-    }else {
+            delete [] result;
+            delete [] freq;
+        } else {
             cout << "Count Sort is only for integers!\n";
             return;
+        }
+    }else{
+        cout << "\n=================================\n";
+        cout << "=Counter Sort For Integer Only=\n";
+        cout << "=================================\n";
+
+        return;
     }
+
+    
 }
 
 template <typename T>
 void SortingSystem<T>::radixSort() {
 
-    if(is_same<T, int>::value) {
+    if(is_same<T, int>::value)
+    {
         if constexpr (is_same<T, int>::value) {
             // base used for the radix sort
             const int base = 10;
 
             // getting the maximum element in the array to know the number of digits of that number
             // to know how many times the count sort function will be called
-            int max_element = data[0];
-            for (int i = 0; i < this->size; i++) {
-                if (data[i] > max_element) {
-                    max_element = data[i];
-                }
-            }
+            int max_element = get_max();
 
             // for each loop, sort the elements based on the least significant bit
-            for (int d = 1; max_element / d > 0; d *= 10) {
+            for(int d=1;max_element/d >0;d*=10){
                 countSort(d);
             }
+        } else {
+            cout << "Radix Sort is only for integers!\n";
+            return;
         }
-    }
-    else {
-        cout << "Radix Sort is only for integers!\n";
+    }else{
+        cout << "\n=============================\n";
+        cout << "=Redix Sort For Integer Only=\n";
+        cout << "=============================\n";
+
         return;
     }
+
 }
 
 
@@ -323,7 +340,6 @@ void SortingSystem<T>::bucketSort() {
             if(data[i] < minValue)
                 minValue = data[i];
         }
-        cout << "max: " << maxValue << " min: " << minValue << endl;
 
         int bucketCount = size;
         T** buckets = new T*[bucketCount];
@@ -335,7 +351,7 @@ void SortingSystem<T>::bucketSort() {
         for (int i = 0; i < size; i++) {
             if constexpr (is_same<T, int>::value || is_same<T, float>::value || is_same<T, double>::value) {
                 int index = (bucketCount * (data[i] - minValue)) / (maxValue - minValue + 1);
-                buckets[index][bucketSizes[index]++] = data[i];
+                buckets[index][bucketSizes[index]++] = data[i];            
             } else {
                 cout << "Bucket sort for non-numeric types is not supported in this branch.\n";
             }
@@ -368,7 +384,6 @@ void SortingSystem<T>::bucketSort() {
             }
             cout << endl;
         }
-        cout << "Merged buckets: " << endl;
         int index = 0;
         for (int i = 0; i < bucketCount; i++) {
             for (int j = 0; j < bucketSizes[i]; j++) {
@@ -380,19 +395,17 @@ void SortingSystem<T>::bucketSort() {
         }
         delete[] buckets;
         delete[] bucketSizes;
-        for (int i = 0; i < size; i++) {
-            cout << data[i] << " ";
-        }cout << endl;
+        displaySortedData();
     }
     else if(typeid(T) == typeid(string)){
         int bucketCount = 26;
         T** buckets = new T*[bucketCount];
         int* bucketSizes = new int[bucketCount]();
-
+    
         for (int i = 0; i < bucketCount; i++) {
             buckets[i] = new T[size];
         }
-
+    
         for (int i = 0; i < size; i++) {
             if(is_same<T, string>::value){
                 if constexpr (is_same<T, string>::value) {
@@ -403,16 +416,16 @@ void SortingSystem<T>::bucketSort() {
                 }
             }
         }
-
+    
         int index = 0;
         for (int i = 0; i < bucketCount; i++) {
             for (int j = 0; j < bucketSizes[i]; j++) {
                 data[index++] = buckets[i][j];
             }
-
+            
         }
-
-
+        
+    
         cout << "Unsorted buckets: " << endl;
         for (int i = 0; i < bucketCount; i++) {
             cout << "Bucket " << i << ": ";
@@ -421,7 +434,7 @@ void SortingSystem<T>::bucketSort() {
             }
             cout << endl;
         }
-
+    
         cout << "Sorted buckets: " << endl;
         for (int i = 0; i < bucketCount; i++) {
             for (int j = 0; j < bucketSizes[i]; j++) {
@@ -434,7 +447,7 @@ void SortingSystem<T>::bucketSort() {
                 }
             }
         }
-
+    
         for (int i = 0; i < bucketCount; i++) {
             cout << "Bucket " << i << ": ";
             for (int j = 0; j < bucketSizes[i]; j++) {
@@ -442,22 +455,24 @@ void SortingSystem<T>::bucketSort() {
             }
             cout << endl;
         }
-
+    
         index = 0;
         for (int i = 0; i < bucketCount; i++) {
             for (int j = 0; j < bucketSizes[i]; j++) {
                 data[index++] = buckets[i][j];
             }
         }
-
+    
         for (int i = 0; i < bucketCount; i++) {
             delete[] buckets[i];
         }
         delete[] buckets;
         delete[] bucketSizes;
-
+        
         displaySortedData();
     }
+    
+   
 }
 
 
@@ -495,12 +510,21 @@ void SortingSystem<T>::displaySortedData() {
         }
     }
     cout << "]"<<endl;
+
 }
 
 
 template <typename T>
 void SortingSystem<T>::measureSortTime(void (SortingSystem::*sortFunc)()) {
-    // Implementation here
+    auto start = std::chrono::high_resolution_clock::now();
+
+    (this->*sortFunc)(); 
+
+    auto end = std::chrono::high_resolution_clock::now(); 
+
+    std::chrono::duration<double> duration = end - start; 
+
+    std::cout << "Sorting completed in: " << duration.count() << " seconds.\n";
 }
 
 /// method to show the main menu calling all the sorting methods
@@ -509,7 +533,7 @@ void SortingSystem<T>::showMenu() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     int choice;
-    cout << "- Please select a sorting algorithm:\n";
+    cout << "\n- Please select a sorting algorithm:\n";
     cout << "   1. Insertion Sort\n";
     cout << "   2. Selection Sort\n";
     cout << "   3. Bubble Sort\n";
@@ -528,50 +552,67 @@ void SortingSystem<T>::showMenu() {
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
     cout << "\n";
-
     switch (choice) {
         case 1:
             cout << "Sorting using Insertion Sort...\n";
+            cout << "Initial Data: ";
+
             displayData();
             insertionSort();
             break;
         case 2:
             cout << "Sorting using Selection Sort...\n";
+            cout << "Initial Data: ";
+
             displayData();
             selectionSort();
             break;
         case 3:
             cout << "Sorting using Bubble Sort...\n";
+            cout << "Initial Data: ";
+
             displayData();
             bubbleSort();
             break;
         case 4:
             cout << "Sorting using Shell Sort...\n";
+            cout << "Initial Data: ";
+
             displayData();
             shellSort();
             break;
         case 5:
             cout << "Sorting using Merge Sort...\n";
+            cout << "Initial Data: ";
+
             displayData();
             mergeSort(0, size - 1);
             break;
         case 6:
             cout << "Sorting using Quick Sort...\n";
+            cout << "Initial Data: ";
+
             displayData();
             quickSort(0, size - 1);
             break;
         case 7:
             cout << "Sorting using Count Sort...\n";
+            cout << "Initial Data: ";
+
             displayData();
             countSort(0);
             break;
         case 8:
-            cout << "Sorting using Radix Sort...\n";
+            cout << "Radix Sort is only for integers!\n";
+            cout << "Initial Data: ";
+
             displayData();
             radixSort();
             break;
         case 9:
             cout << "Sorting using Bucket Sort...\n";
+            cout << "Initial Data: ";
+
             displayData();
             bucketSort();
             break;
@@ -594,7 +635,7 @@ int main() {
     do {
         int size;
         cout << "- Please enter the number of items to sort: ";
-
+        
         while (!(cin >> size) || size <= 0) {
             cout << "Invalid input. Please enter a valid positive integer greater than 0: ";
             cin.clear();
@@ -603,8 +644,8 @@ int main() {
 
         string DataType;
         cout << "Enter Data 1: ";
-
-        cin.ignore();
+        
+        cin.ignore(); 
 
         string temp;
         getline(cin, temp);
@@ -665,7 +706,6 @@ int main() {
                     }
                 }
             } else if (DataType == "string") {
-                // cin.ignore();
                 getline(cin, static_cast<std::string*>(data)[i]);
             }
         }
@@ -698,7 +738,11 @@ int main() {
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
         if (choice == 'N' || choice == 'n') {
-            cout << "\n-- Thank you for using the sorting system! Goodbye!\n";
+            cout << "\n===================================================\n";
+            cout << "-- Thank you for using the sorting system! Goodbye!\n";
+            cout << "===================================================\n\n";
+
+
             break;
         }
 
