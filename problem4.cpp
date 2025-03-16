@@ -256,6 +256,7 @@ void SortingSystem<T>::countSort(const int &d){
                 cout << "\n1. Creating a frequency array to store the frequency of each least significant digit\n";
                 // Count the occurrences of each digit -> the least significant bit
                 for (int i = 0; i < this->size; i++) {
+                    //extracting the least significant bit
                     int digit = (data[i] / d) % base;
                     freq[digit]++;
                 }
@@ -300,9 +301,9 @@ void SortingSystem<T>::countSort(const int &d){
 
                 }
                 cout << "\nThis is a divide-and-conquer algorithm which takes:\n"
-                     << "Best case: O(n log n)\n"
-                     << "Average case: O(n log n)\n"
-                     << "Worst case: O(n^2)\n"
+                     << "Best case: O(d*(n+k))\n"
+                     << "Average case: O(d*(n + k))\n"
+                     << "Worst case: O(d*(n + k))\n"
                      << "where n is the number of elements.\n\n";
             }
 
@@ -331,9 +332,6 @@ void SortingSystem<T>::radixSort() {
     if(is_same<T, int>::value)
     {
         if constexpr (is_same<T, int>::value) {
-            // base used for the radix sort
-            const int base = 10;
-
             // getting the maximum element in the array to know the number of digits of that number
             // to know how many times the count sort function will be called
             int max_element = data[0];
@@ -352,7 +350,6 @@ void SortingSystem<T>::radixSort() {
         cout << "Radix Sort is only for integers!\n";
         return;
     }
-
 }
 
 template <typename T>
