@@ -59,7 +59,7 @@ SortingSystem<T>::SortingSystem(int n, T* data) {
     this->data = new T[size];
     for (int i = 0; i < size; i++) {
         this->data[i] = data[i];
-    }    
+    }
 }
 
 
@@ -76,7 +76,37 @@ void SortingSystem<T>::insertionSort() {
 
 template <typename T>
 void SortingSystem<T>::selectionSort() {
-    // Implementation here
+    for (int i = 0; i < this->size - 1; i++) {
+        int least = i; // Initialize the index of the smallest element to the current index
+        // Find the index of the smallest element in the unsorted portion
+        for (int j = i + 1; j < this->size; j++) {
+            if (this->data[j] < this->data[least]) {
+                least = j;
+            }
+        }
+
+        // Output the least element found in this iteration
+        cout << "-> Least element [" << this->data[least] << "] in iteration " << i << " is at index [" << least << "]\n";
+        // Swap the smallest element with the current element
+        swap(this->data[least], this->data[i]);
+        cout << "Swapped elements:\n"
+             << " -> " << this->data[least] << " at index " << i << "\n -> " << this->data[i] << " at index " << least << "\n";
+
+        // Display the current state of the array
+        cout << "Set after iteration " << i << ": \n[";
+        for (int i = 0; i < size; i++) {
+            cout << data[i];
+            if (i < size - 1) {
+                cout << ", ";
+            }
+        }
+        cout << "]\n\n";
+    }
+    cout << "-> This is a 1-case algorithm, it takes:\n"
+         << "  Best Case: O(n^2) (even if the array is already sorted, the algorithm still performs all comparisons).\n"
+         << "  Average case: O(n^2)\n"
+         << "  Worst Case: O(n^2) (when the array is in reverse order).\n"
+         << "  where n is the number of elements.\n";
 }
 
 template <typename T>
@@ -116,7 +146,36 @@ void SortingSystem<T>::mergeSort(int left, int right) {
 
 template <typename T>
 void SortingSystem<T>::quickSort(int left, int right) {
-    // Implementation here
+    if (left >= right) return;
+    else {
+        int pivotIndex = partition(left , right);
+        cout << "-> Pivot: " << this->data[pivotIndex] ;
+
+        // Display the current state of the array
+        cout << " -> Set: " << "[" ;
+        for (int i = left; i <= right; i++) {
+            cout << data[i];
+            if (i < right) {
+                cout << ", ";
+            }
+        }
+        cout << "]\n\n";
+        // Recursively make the same thing to the part before and after pivot
+        quickSort(left , pivotIndex - 1);
+        quickSort(pivotIndex + 1 , right);
+
+        // Print the final sorted set after the recursion completes
+        if (left == 0 && right == size - 1) {
+            cout << "-> Final Sorted Set: [";
+            for (int i = 0; i < size; i++) {
+                cout << data[i];
+                if (i < size - 1) {
+                    cout << ", ";
+                }
+            }
+            cout << "]\n";
+        }
+    }
 }
 
 /// function used to return the maximum element in the input data
@@ -201,10 +260,10 @@ void SortingSystem<T>::countSort(const int &d){
                     freq[data[i]]= freq[data[i]]-1;
                 }
                 cout << "\n- This is a non comparative algorithm as it doesn't compare the elements directly, it takes:\n"
-                    << "  Best case: O(n + k)\n"
-                    << "  Average case: O(n + k)\n"
-                    << "  Worst case: O(n + k)\n"
-                    << "  where n is the number of elements and k is the range of input.\n\n";
+                     << "  Best case: O(n + k)\n"
+                     << "  Average case: O(n + k)\n"
+                     << "  Worst case: O(n + k)\n"
+                     << "  where n is the number of elements and k is the range of input.\n\n";
                 // radix sort was called
             }else {
 
@@ -263,10 +322,10 @@ void SortingSystem<T>::countSort(const int &d){
 
                 }
                 cout << "\nThis is a divide-and-conquer algorithm which takes:\n"
-                    << "Best case: O(n log n)\n"
-                    << "Average case: O(n log n)\n"
-                    << "Worst case: O(n^2)\n"
-                    << "where n is the number of elements.\n\n";
+                     << "Best case: O(n log n)\n"
+                     << "Average case: O(n log n)\n"
+                     << "Worst case: O(n^2)\n"
+                     << "where n is the number of elements.\n\n";
             }
 
 
@@ -293,7 +352,7 @@ void SortingSystem<T>::countSort(const int &d){
         return;
     }
 
-    
+
 }
 
 template <typename T>
@@ -351,7 +410,7 @@ void SortingSystem<T>::bucketSort() {
         for (int i = 0; i < size; i++) {
             if constexpr (is_same<T, int>::value || is_same<T, float>::value || is_same<T, double>::value) {
                 int index = (bucketCount * (data[i] - minValue)) / (maxValue - minValue + 1);
-                buckets[index][bucketSizes[index]++] = data[i];            
+                buckets[index][bucketSizes[index]++] = data[i];
             } else {
                 cout << "Bucket sort for non-numeric types is not supported in this branch.\n";
             }
@@ -401,11 +460,11 @@ void SortingSystem<T>::bucketSort() {
         int bucketCount = 26;
         T** buckets = new T*[bucketCount];
         int* bucketSizes = new int[bucketCount]();
-    
+
         for (int i = 0; i < bucketCount; i++) {
             buckets[i] = new T[size];
         }
-    
+
         for (int i = 0; i < size; i++) {
             if(is_same<T, string>::value){
                 if constexpr (is_same<T, string>::value) {
@@ -416,16 +475,16 @@ void SortingSystem<T>::bucketSort() {
                 }
             }
         }
-    
+
         int index = 0;
         for (int i = 0; i < bucketCount; i++) {
             for (int j = 0; j < bucketSizes[i]; j++) {
                 data[index++] = buckets[i][j];
             }
-            
+
         }
-        
-    
+
+
         cout << "Unsorted buckets: " << endl;
         for (int i = 0; i < bucketCount; i++) {
             cout << "Bucket " << i << ": ";
@@ -434,7 +493,7 @@ void SortingSystem<T>::bucketSort() {
             }
             cout << endl;
         }
-    
+
         cout << "Sorted buckets: " << endl;
         for (int i = 0; i < bucketCount; i++) {
             for (int j = 0; j < bucketSizes[i]; j++) {
@@ -447,7 +506,7 @@ void SortingSystem<T>::bucketSort() {
                 }
             }
         }
-    
+
         for (int i = 0; i < bucketCount; i++) {
             cout << "Bucket " << i << ": ";
             for (int j = 0; j < bucketSizes[i]; j++) {
@@ -455,24 +514,24 @@ void SortingSystem<T>::bucketSort() {
             }
             cout << endl;
         }
-    
+
         index = 0;
         for (int i = 0; i < bucketCount; i++) {
             for (int j = 0; j < bucketSizes[i]; j++) {
                 data[index++] = buckets[i][j];
             }
         }
-    
+
         for (int i = 0; i < bucketCount; i++) {
             delete[] buckets[i];
         }
         delete[] buckets;
         delete[] bucketSizes;
-        
+
         displaySortedData();
     }
-    
-   
+
+
 }
 
 
@@ -481,10 +540,28 @@ void SortingSystem<T>::merge(int left, int mid, int right) {
     // Implementation here
 }
 
+/// function to get the pivot of quicksort
 template <typename T>
 int SortingSystem<T>::partition(int low, int high) {
-    // Implementation here
-    return 0;
+    // This function used to make all the elements before pivot is smaller amd what elements after pivot is greater
+    T x = this->data[low];
+    // Let the pivot is the first element
+    int i  = low;
+    /* Put j at the index after the first element
+     If the element that i points to is greater so make with order
+     - increase the index i
+     - swap the elements on both indices
+     - increase the index j , else increase the index j only
+     */
+    for (int j = low+1 ; j <= high; j++){
+        if (this->data[j] < x){
+            i++;
+            swap(this->data[i] , this->data[j]);
+        }
+    }
+    // Swap between pivot and what i points to
+    swap(this->data[i] , this->data[low]);
+    return i;
 }
 
 template <typename T>
@@ -518,11 +595,11 @@ template <typename T>
 void SortingSystem<T>::measureSortTime(void (SortingSystem::*sortFunc)()) {
     auto start = std::chrono::high_resolution_clock::now();
 
-    (this->*sortFunc)(); 
+    (this->*sortFunc)();
 
-    auto end = std::chrono::high_resolution_clock::now(); 
+    auto end = std::chrono::high_resolution_clock::now();
 
-    std::chrono::duration<double> duration = end - start; 
+    std::chrono::duration<double> duration = end - start;
 
     std::cout << "Sorting completed in: " << duration.count() << " seconds.\n";
 }
@@ -594,6 +671,12 @@ void SortingSystem<T>::showMenu() {
 
             displayData();
             quickSort(0, size - 1);
+            cout << "-> This is a divide-and-conquer algorithm which takes:\n"
+                 << "Best case: O(n log n)\n"
+                 << "Average case: O(n log n)\n"
+                 << "Worst case: O(n^2)\n"
+                 << "Partition part: O(n)\n"
+                 << "where n is the number of elements.\n\n";
             break;
         case 7:
             cout << "Sorting using Count Sort...\n";
@@ -635,7 +718,7 @@ int main() {
     do {
         int size;
         cout << "- Please enter the number of items to sort: ";
-        
+
         while (!(cin >> size) || size <= 0) {
             cout << "Invalid input. Please enter a valid positive integer greater than 0: ";
             cin.clear();
@@ -644,8 +727,8 @@ int main() {
 
         string DataType;
         cout << "Enter Data 1: ";
-        
-        cin.ignore(); 
+
+        cin.ignore();
 
         string temp;
         getline(cin, temp);
