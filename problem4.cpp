@@ -11,8 +11,6 @@
 #include <cstring>
 using namespace std;
 
-/// function to swap
-
 void swap (int &x , int &y){
     x = x ^ y ;
     y = x ^ y ;
@@ -50,7 +48,6 @@ public:
     void displaySortedData();
     void measureSortTime(void (SortingSystem::*sortFunc)());
     void showMenu();
-    int get_max(); // used to return the maximum number for the count and radix sort
 };
 
 template <typename T>
@@ -147,7 +144,7 @@ void SortingSystem<T>::mergeSort(int left, int right) {
 template <typename T>
 void SortingSystem<T>::quickSort(int left, int right) {
     if (left >= right) return;
-    else {
+
         int pivotIndex = partition(left , right);
         cout << "-> Pivot: " << this->data[pivotIndex] ;
 
@@ -160,34 +157,18 @@ void SortingSystem<T>::quickSort(int left, int right) {
             }
         }
         cout << "]\n\n";
+
         // Recursively make the same thing to the part before and after pivot
         quickSort(left , pivotIndex - 1);
         quickSort(pivotIndex + 1 , right);
+        displayData();
+    cout << "\n-> This is a divide-and-conquer algorithm which takes:\n"
+         << "Best case: O(n log n)\n"
+         << "Average case: O(n log n)\n"
+         << "Worst case: O(n^2)\n"
+         << "Partition part: O(n)\n"
+         << "where n is the number of elements.\n\n";
 
-        // Print the final sorted set after the recursion completes
-        if (left == 0 && right == size - 1) {
-            cout << "-> Final Sorted Set: [";
-            for (int i = 0; i < size; i++) {
-                cout << data[i];
-                if (i < size - 1) {
-                    cout << ", ";
-                }
-            }
-            cout << "]\n";
-        }
-    }
-}
-
-/// function used to return the maximum element in the input data
-template<>
-int SortingSystem<int>::get_max() {
-    int max_element = data[0];
-    for(int i=0;i<this->size;i++){
-        if(data[i]>max_element){
-            max_element = data[i];
-        }
-    }
-    return max_element;
 }
 
 template<typename T>
@@ -199,7 +180,12 @@ void SortingSystem<T>::countSort(const int &d){
             const int base = 10;
 
             // storing the max element
-            int max_element = get_max();
+            int max_element = data[0];
+            for(int i=0;i<this->size;i++){
+                if(data[i]>max_element){
+                    max_element = data[i];
+                }
+            }
 
             // creating a dynamic array to store the frequency of each element
             int*freq;
@@ -340,19 +326,11 @@ void SortingSystem<T>::countSort(const int &d){
             // deallocating the memory
             delete [] result;
             delete [] freq;
-        } else {
-            cout << "Count Sort is only for integers!\n";
-            return;
         }
     }else{
-        cout << "\n=================================\n";
-        cout << "=Counter Sort For Integer Only=\n";
-        cout << "=================================\n";
-
+        cout << "Count Sort is only for integers!\n";
         return;
     }
-
-
 }
 
 template <typename T>
@@ -366,26 +344,24 @@ void SortingSystem<T>::radixSort() {
 
             // getting the maximum element in the array to know the number of digits of that number
             // to know how many times the count sort function will be called
-            int max_element = get_max();
+            int max_element = data[0];
+            for(int i=0;i<this->size;i++){
+                if(data[i]>max_element){
+                    max_element = data[i];
+                }
+            }
 
             // for each loop, sort the elements based on the least significant bit
             for(int d=1;max_element/d >0;d*=10){
                 countSort(d);
             }
-        } else {
-            cout << "Radix Sort is only for integers!\n";
-            return;
         }
     }else{
-        cout << "\n=============================\n";
-        cout << "=Redix Sort For Integer Only=\n";
-        cout << "=============================\n";
-
+        cout << "Radix Sort is only for integers!\n";
         return;
     }
 
 }
-
 
 template <typename T>
 void SortingSystem<T>::bucketSort() {
@@ -543,25 +519,35 @@ void SortingSystem<T>::merge(int left, int mid, int right) {
 /// function to get the pivot of quicksort
 template <typename T>
 int SortingSystem<T>::partition(int low, int high) {
+
     // This function used to make all the elements before pivot is smaller amd what elements after pivot is greater
-    T x = this->data[low];
+    T x = this->data[high];
     // Let the pivot is the first element
-    int i  = low;
+    int i  = low-1;
     /* Put j at the index after the first element
      If the element that i points to is greater so make with order
      - increase the index i
      - swap the elements on both indices
      - increase the index j , else increase the index j only
      */
-    for (int j = low+1 ; j <= high; j++){
-        if (this->data[j] < x){
+    for (int j = low ; j < high; j++){
+        if (this->data[j] <= x){
             i++;
-            swap(this->data[i] , this->data[j]);
+            if (i != j) {  // Avoid unnecessary swaps
+                cout << "Swapping: " << this->data[i] << " and " << this->data[j] << endl;
+                swap(this->data[i], this->data[j]);
+                displayData();
+            }
         }
     }
-    // Swap between pivot and what i points to
-    swap(this->data[i] , this->data[low]);
-    return i;
+    // making sure that i is not > high (not out of range)
+    if (i + 1 < high) {
+        cout << "Swapping pivot: " << this->data[i + 1] << " and " << x << endl;
+        swap(this->data[i + 1], this->data[high]);
+    }
+
+    displayData();
+    return i+1;
 }
 
 template <typename T>
@@ -671,12 +657,6 @@ void SortingSystem<T>::showMenu() {
 
             displayData();
             quickSort(0, size - 1);
-            cout << "-> This is a divide-and-conquer algorithm which takes:\n"
-                 << "Best case: O(n log n)\n"
-                 << "Average case: O(n log n)\n"
-                 << "Worst case: O(n^2)\n"
-                 << "Partition part: O(n)\n"
-                 << "where n is the number of elements.\n\n";
             break;
         case 7:
             cout << "Sorting using Count Sort...\n";
@@ -821,9 +801,7 @@ int main() {
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
         if (choice == 'N' || choice == 'n') {
-            cout << "\n===================================================\n";
-            cout << "-- Thank you for using the sorting system! Goodbye!\n";
-            cout << "===================================================\n\n";
+            cout << "\n-- Thank you for using the sorting system! Goodbye!\n";
 
 
             break;
