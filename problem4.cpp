@@ -145,30 +145,22 @@ template <typename T>
 void SortingSystem<T>::quickSort(int left, int right) {
     if (left >= right) return;
 
-        int pivotIndex = partition(left , right);
-        cout << "-> Pivot: " << this->data[pivotIndex] ;
+    int pivotIndex = partition(left , right);
+    cout << "\n-> Pivot: " << this->data[pivotIndex] ;
 
-        // Display the current state of the array
-        cout << " -> Set: " << "[" ;
-        for (int i = left; i <= right; i++) {
-            cout << data[i];
-            if (i < right) {
-                cout << ", ";
-            }
+    // Display the current state of the array
+    cout << " -> Set: " << "[" ;
+    for (int i = left; i <= right; i++) {
+        cout << data[i];
+        if (i < right) {
+            cout << ", ";
         }
-        cout << "]\n\n";
+    }
+    cout << "]\n";
 
-        // Recursively make the same thing to the part before and after pivot
-        quickSort(left , pivotIndex - 1);
-        quickSort(pivotIndex + 1 , right);
-        displayData();
-    cout << "\n-> This is a divide-and-conquer algorithm which takes:\n"
-         << "Best case: O(n log n)\n"
-         << "Average case: O(n log n)\n"
-         << "Worst case: O(n^2)\n"
-         << "Partition part: O(n)\n"
-         << "where n is the number of elements.\n\n";
-
+    // Recursively make the same thing to the part before and after pivot
+    quickSort(left , pivotIndex - 1);
+    quickSort(pivotIndex + 1 , right);
 }
 
 template<typename T>
@@ -521,33 +513,29 @@ template <typename T>
 int SortingSystem<T>::partition(int low, int high) {
 
     // This function used to make all the elements before pivot is smaller amd what elements after pivot is greater
-    T x = this->data[high];
+    T x = this->data[low];
     // Let the pivot is the first element
-    int i  = low-1;
+    int i  = low;
     /* Put j at the index after the first element
      If the element that i points to is greater so make with order
      - increase the index i
      - swap the elements on both indices
      - increase the index j , else increase the index j only
      */
-    for (int j = low ; j < high; j++){
+    for (int j = low + 1 ; j <= high; j++){
         if (this->data[j] <= x){
             i++;
             if (i != j) {  // Avoid unnecessary swaps
-                cout << "Swapping: " << this->data[i] << " and " << this->data[j] << endl;
                 swap(this->data[i], this->data[j]);
-                displayData();
             }
         }
     }
     // making sure that i is not > high (not out of range)
-    if (i + 1 < high) {
-        cout << "Swapping pivot: " << this->data[i + 1] << " and " << x << endl;
-        swap(this->data[i + 1], this->data[high]);
+    if (i != low) {
+        swap(this->data[i], this->data[low]);
     }
 
-    displayData();
-    return i+1;
+    return i;
 }
 
 template <typename T>
@@ -657,6 +645,15 @@ void SortingSystem<T>::showMenu() {
 
             displayData();
             quickSort(0, size - 1);
+            cout << "\n-> Final Sorted Set: ";
+            displayData();
+            //measureSortTime(&SortingSystem::quickSort(0,size-1));
+            cout << "\n-> This is a divide-and-conquer algorithm which takes:\n"
+                 << "Best case: O(n log n)\n"
+                 << "Average case: O(n log n)\n"
+                 << "Worst case: O(n^2)\n"
+                 << "Partition part: O(n)\n"
+                 << "where n is the number of elements.\n\n";
             break;
         case 7:
             cout << "Sorting using Count Sort...\n";
