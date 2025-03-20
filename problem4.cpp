@@ -35,7 +35,7 @@ public:
     void shellSort();
     void mergeSort(int left, int right);
     void quickSort(int left, int right);
-    void countSort(const int &d);  // Only for int
+    void countSort();  // Only for int
     void radixSort();  // Only for int
     void bucketSort();
 
@@ -164,12 +164,11 @@ void SortingSystem<T>::quickSort(int left, int right) {
 }
 
 template<typename T>
-void SortingSystem<T>::countSort(const int &d){
+void SortingSystem<T>::countSort(){
 
+    // validation check to make sure that the input is an integer to be able to apply count sort
     if(is_same<T, int>::value){
         if constexpr (is_same<T, int>::value) {
-            // base used for the radix sort
-            const int base = 10;
 
             // storing the max element
             int max_element = data[0];
@@ -180,74 +179,108 @@ void SortingSystem<T>::countSort(const int &d){
             }
 
             // creating a dynamic array to store the frequency of each element
-            int*freq;
+            // the size of the frequency array = max_element + 1 as the array is zero based
+            int*freq=new int[max_element+1]();
 
             // creating a dynamic array to store the result after sorting
             int *result = new int [this->size]();
 
-            // count sort is called
-            if(d==0){
+            cout << "\n1. Creating a frequency array to store the frequency of each element\n";
+            // calculating the frequency of each value
+            for(int j=0;j< this->size;j++){
+                freq[data[j]] = freq[data[j]] +1;
+            }
 
-                // the size of the frequency array = max_element + 1 as the array is zero based
-                freq = new int[max_element+1]();
-                for(int i = 0;i<max_element;i++){
-                    freq[i] =0;
+            // Display frequency array
+            cout << "Frequency Array: [";
+            for (int i = 0; i <= max_element; i++) {
+                cout << freq[i] << " ";
+            }
+            cout << "]\n\n";
+
+            cout << "2. Calculating the cumulative frequency to know how many elements are less than or equal each element\n";
+            // calculating the cumulative frequency to know how many elements are less than or equal each element
+            for(int i=1;i<=max_element;i++){
+                freq[i] = freq[i] + freq[i-1];
+            }
+
+            // Display cumulative frequency array
+            cout << "Cumulative Frequency Array: [";
+            for (int i = 0; i <= max_element; i++) {
+                cout << freq[i] << " ";
+            }
+            cout << "]\n\n";
+
+            cout << "The array before sorting\n";
+            displayData();
+            cout << endl;
+
+            // storing the sorted numbers in the result array
+            for(int i=this->size-1;i>=0;i--){
+                result[freq[data[i]]-1] = data[i];
+
+                // Display the array after each interation
+                cout << "- Placing [" << data[i] << "] at position : " << (freq[data[i]]-1)+1<< "\n";
+                cout << "  Sorted Array: [";
+                for (int j = 0; j < this->size; j++) {
+                    cout << result[j];
+                    if (j < this->size - 1) cout << " ";
                 }
+                cout << "] \n";
+                freq[data[i]]= freq[data[i]]-1;
+            }
 
-                cout << "\n1. Creating a frequency array to store the frequency of each element\n";
-                // calculating the frequency of each value
-                for(int j=0;j< this->size;j++){
-                    freq[data[j]] = freq[data[j]] +1;
+            // Copy the sorted elements back to the original array
+            for (int i = 0; i < this->size; i++) {
+                data[i] = result[i];
+            }
+
+            cout << "\n";
+            // displaying the sorted elements
+            displaySortedData();
+
+            cout << "\n- This is a non comparative algorithm as it doesn't compare the elements directly, it takes:\n"
+                 << "  Best case: O(n + k)\n"
+                 << "  Average case: O(n + k)\n"
+                 << "  Worst case: O(n + k)\n"
+                 << "  where n is the number of elements and k is the range of input.\n\n";
+
+            // deallocating the memory
+            delete [] result;
+            delete [] freq;
+        }
+    }else{
+        cout << "Count Sort is only for integers!\n";
+        return;
+    }
+}
+
+template <typename T>
+void SortingSystem<T>::radixSort() {
+
+    // check to make sure that the input is an integer to be able to sort using radix sort
+    if(is_same<T, int>::value)
+    {
+        if constexpr (is_same<T, int>::value) {
+            // creating a dynamic array to store the result after sorting
+            int *result = new int [this->size]();
+
+            // base used for the radix sort
+            const int base = 10;
+            int *freq;
+
+            // getting the maximum element in the array to know the number of digits of that number
+            int max_element = data[0];
+            for(int i=0;i<this->size;i++){
+                if(data[i]>max_element){
+                    max_element = data[i];
                 }
+            }
 
-                // Display frequency array
-                cout << "Frequency Array: [";
-                for (int i = 0; i <= max_element; i++) {
-                    cout << freq[i] << " ";
-                }
-                cout << "]\n\n";
+            // for each loop, sort the elements based on the least significant bit
+            for(int d=1;max_element/d >0;d*=10){
 
-                cout << "2. Calculating the cumulative frequency to know how many elements are less than or equal each element\n";
-                // calculating the cumulative frequency to know how many elements are less than or equal each element
-                for(int i=1;i<=max_element;i++){
-                    freq[i] = freq[i] + freq[i-1];
-                }
-
-                // Display cumulative frequency array
-                cout << "Cumulative Frequency Array: [";
-                for (int i = 0; i <= max_element; i++) {
-                    cout << freq[i] << " ";
-                }
-                cout << "]\n\n";
-
-                cout << "The array before sorting\n";
-                displayData();
-                cout << endl;
-                // storing the sorted numbers in the result array
-                for(int i=this->size-1;i>=0;i--){
-                    result[freq[data[i]]-1] = data[i];
-
-                    // Display the array after each interation
-                    cout << "- Placing [" << data[i] << "] at position : " << (freq[data[i]]-1)+1<< "\n";
-                    cout << "  Sorted Array: [";
-                    for (int j = 0; j < this->size; j++) {
-                        cout << result[j];
-                        if (j < this->size - 1) cout << " ";
-                    }
-                    cout << "] \n";
-                    freq[data[i]]= freq[data[i]]-1;
-                }
-                cout << "\n- This is a non comparative algorithm as it doesn't compare the elements directly, it takes:\n"
-                     << "  Best case: O(n + k)\n"
-                     << "  Average case: O(n + k)\n"
-                     << "  Worst case: O(n + k)\n"
-                     << "  where n is the number of elements and k is the range of input.\n\n";
-                // radix sort was called
-            }else {
-
-                // dynamically allocating a frequency array
-                freq = new int[base];
-
+                freq = new int [base];
                 // initialize the freq array to zero
                 for (int i = 0; i < base; i++) {
                     freq[i] = 0;
@@ -298,53 +331,26 @@ void SortingSystem<T>::countSort(const int &d){
                     }
                     cout << "]\n";
                     freq[digit]--;
-
                 }
-                cout << "\nThis is a divide-and-conquer algorithm which takes:\n"
-                     << "Best case: O(d*(n+k))\n"
-                     << "Average case: O(d*(n + k))\n"
-                     << "Worst case: O(d*(n + k))\n"
-                     << "where n is the number of elements.\n\n";
             }
-
 
             // Copy the sorted elements back to the original array
             for (int i = 0; i < this->size; i++) {
                 data[i] = result[i];
             }
 
+            cout << "\n";
             // displaying the sorted elements
             displaySortedData();
 
+            cout << "\nThis is a divide-and-conquer algorithm which takes:\n"
+                 << "Best case: O(d*(n + k))\n"
+                 << "Average case: O(d*(n + k))\n"
+                 << "Worst case: O(d*(n + k))\n"
+                 << "where n is the number of elements.\n\n";
             // deallocating the memory
             delete [] result;
             delete [] freq;
-        }
-    }else{
-        cout << "Count Sort is only for integers!\n";
-        return;
-    }
-}
-
-template <typename T>
-void SortingSystem<T>::radixSort() {
-
-    if(is_same<T, int>::value)
-    {
-        if constexpr (is_same<T, int>::value) {
-            // getting the maximum element in the array to know the number of digits of that number
-            // to know how many times the count sort function will be called
-            int max_element = data[0];
-            for(int i=0;i<this->size;i++){
-                if(data[i]>max_element){
-                    max_element = data[i];
-                }
-            }
-
-            // for each loop, sort the elements based on the least significant bit
-            for(int d=1;max_element/d >0;d*=10){
-                countSort(d);
-            }
         }
     }else{
         cout << "Radix Sort is only for integers!\n";
@@ -657,7 +663,7 @@ void SortingSystem<T>::showMenu() {
             cout << "Initial Data: ";
 
             displayData();
-            countSort(0);
+            countSort();
             break;
         case 8:
             cout << "Radix Sort is only for integers!\n";
